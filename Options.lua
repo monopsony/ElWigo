@@ -39,6 +39,7 @@ local generalOptions = {
 	refreshRate = {
 		type = 'range',
 		name = 'Refresh time (s)',
+		order = 1,
 		min = 0.01,
 		softMax = 1,
 		step = 0.01,
@@ -51,6 +52,20 @@ local generalOptions = {
 
 		set = function(tbl, value)
 			EW.para.refreshRate = value
+		end,
+	},
+
+	hideBW = {
+		type = 'toggle',
+		name = 'Hide BW bars',
+		order = 2,
+
+		get = function()
+			return EW.para.hideBW
+		end,
+
+		set = function(tbl, value)
+			EW.para.hideBW = value
 		end,
 	},
 }
@@ -868,7 +883,9 @@ local customIconOptions = {
 		type   = 'toggle',
 		name   = 'Phase count',
 		order  = 3,
-
+		desc   = 'Enable to use phase counts instead of actual phase numbers. '
+			..'For example, if the boss goes phase 1 -> 2 -> 1 -> 2, '
+			..'phase count goes 1 -> 2 -> 3 -> 4',
 		hidden = function()
 			local typ = opt:getSelectedIconPara('customType')
 			return typ ~= 'Phase time'

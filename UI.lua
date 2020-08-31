@@ -35,7 +35,6 @@ function EW:updateBar(n)
 	local bar = EW.bars[n]
 	if not self.para.bars[n].shown then 
 		bar:Hide()
-		return 
 	else
 		bar:Show()
 	end
@@ -45,7 +44,6 @@ function EW:updateBar(n)
 	bar.maxTime = para.maxTime
 
 	-- do the updating
-	bar:Show()
 	bar:ClearAllPoints()
 	local anchor = (para.vertical and 'BOTTOM') or 'LEFT'
 	bar:SetPoint(anchor, UIParent, "BOTTOMLEFT", unpack(para.pos))
@@ -183,30 +181,14 @@ local sacro = EW.utils.acronym
 local srbn  = EW.utils.removeBracketsNumber
 function EW:spawnIcon(spellID, name1, duration, iconID, para)
 	local name, num = strip(name1)
-
-	-- toad recycling
-	local frame = createIconFrame()
-	frame:Show()
-
-
-	--local barID     = 1
-	--local bossID    = self.engageID or 0
-	--local userPara  = {}
-
-	--if self.para.bosses[bossID] and self.para.bosses[bossID][spellID] then 
-	--	barID = self.para.bosses[bossID][spellID]['bar'] or 1
-	--	userPara = self.para.bosses[bossID][spellID]
-	--end
-
-	--local para    = {
-	--	__default = self.para.icons.defaults[barID],
-	--	__user    = userPara,
-	--}
-	--setmetatable(para, paraMetaTable)
 	local para = para or EW:getIconPara(spellID)
 
-	-- toad proper bar
-	local bar       = self.bars[para.bar]
+	local frame = createIconFrame()
+	local bar   = self.bars[para.bar]
+	if not bar.para.shown then return end
+
+	frame:Show()
+
 	frame.bar       = bar
 	frame.para      = para
 	frame.name      = name
@@ -230,6 +212,8 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 
 	tinsert(bar.frames, frame)
 	self:updateAnchors(bar)
+
+	frame:SetParent(bar)
 
 	frame:SetScript("OnUpdate", frameOnUpdate)
 end
@@ -316,7 +300,7 @@ end
 function EW:updateFramePara(frame)
 	local para = frame.para
 	frame:SetSize(para.width, para.height)
-	
+
 	local bg = LSM:Fetch("background",para.background)
 	local edge = LSM:Fetch("border", para.border)
 	local bd = {
@@ -401,7 +385,7 @@ function EW:startCustomTimers()
 	if not para then return end
 
 
-	for _, extraKey in ipairs(para.__extras) do 
+	for _, extraKey in ipairs(para.__extras or {}) do 
 		local p = self:getIconPara(extraKey)
 
 		if p then
@@ -436,7 +420,7 @@ function EW:startCustomPhaseTimers()
 	if not para then return end
 	local phase = self.phase 
 
-	for _, extraKey in ipairs(para.__extras) do 
+	for _, extraKey in ipairs(para.__extras or {}) do 
 		local p = self:getIconPara(extraKey)
 		local phase = (p.usePhaseCount and self.phaseCount) or self.phase 
 

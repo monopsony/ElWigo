@@ -13,22 +13,22 @@ function BW:registerAllMessages()
 	register(self, "BigWigs_StopBar",        self.stopBar)
 	register(self, "BigWigs_StopBars",       self.stopBars)
 	register(self, "BigWigs_OnBossDisable",  self.onBossDisable)
-	register(self, "BigWigs_BarCreated",     self.barCreated)
 	register(self, "BigWigs_Message",        self.message)
 	--register(self, "BigWigs_OnBossEngage",   self.bossEngaged)
 
-	-- BW:RegisterMessage("BigWigs_Message", BW.message)
+	register(self, "BigWigs_BarCreated",    self.barCreated)
+	register(self, "BigWigs_BarEmphasized", self.barCreated) 
+	-- technically dont need on emphasize because if bar is hidden
+	-- it doesnt onUpdate and thus doesnt trigger the emphasize 
 
 end
 
 function BW:dummyFunction(...)
-	print('BW dummy function', ...)
 end
 
 function BW:startBar(_, spellID, name, duration, icon)
 
 	-- toad remove
-	--print(spellID, name2, duration, icon)
 	EW:spawnIcon(spellID, name, duration, icon)
 end
 
@@ -44,7 +44,12 @@ function BW:onBossDisable(...)
 	EW.engageID = nil 
 end
 
-function BW:barCreated(table1, table2, bar, name1, name2, duration, icon)
+function BW:barCreated(table1, bar, _, name1, name2, duration, icon)
+	if EW.para.hideBW then bar:Hide() end
+end
+
+function BW:barCreated2(table1, bar, _, name1, name2, duration, icon)
+	if EW.para.hideBW then bar:Hide() end
 end
 
 function BW:message(key, text, color, icon)
@@ -52,7 +57,6 @@ function BW:message(key, text, color, icon)
 end
 
 --function BW:bossEngaged(bossTbl, difficulty)
---	print('boss Engaged')
 --	EW.engageID = bossTbl.engageId
 --	EW.bossTbl  = bossTbl
 --end
