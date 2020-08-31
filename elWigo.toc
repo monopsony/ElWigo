@@ -1,0 +1,16 @@
+## Interface: 80000
+## Title: elWigo
+## Notes: Mierihn is gay
+## Author: Gay
+## Version: v0.1
+## DefaultState: disabled
+## SavedVariables: ElWigoDB
+
+libs.xml
+
+Core.lua
+Utils.lua 
+
+BigWigs.lua
+UI.lua
+Options.lua
