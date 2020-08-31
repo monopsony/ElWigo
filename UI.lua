@@ -77,11 +77,11 @@ function EW:updateBar(n)
 		bar.startAnchor = (para.reverse and "BOTTOM") or "TOP"
 		bar.endAnchor   = (para.reverse and "TOP") or "BOTTOM"
 		bar.x_mul       = 0
-		bar.y_mul       = 1
+		bar.y_mul       = (para.reverse and -1) or 1
 	else
 		bar.startAnchor = (para.reverse and "LEFT") or "RIGHT"
 		bar.endAnchor   = (para.reverse and "RIGHT") or "LEFT"
-		bar.x_mul       = 1
+		bar.x_mul       = (para.reverse and -1) or 1
 		bar.y_mul       = 0
 	end
 	bar.lengthPerTime = para.length / para.maxTime
