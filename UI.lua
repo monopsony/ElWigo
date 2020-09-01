@@ -115,13 +115,12 @@ function EW:updateBar(n)
 		local a1, a2 = unpack(EW.utils.dirToAnchors[para.tickTextPosition])
 		t.text:ClearAllPoints()
 		t.text:SetPoint(a2, t, a1)
+		t.text:SetTextColor(unpack(para.tickTextColor))
 
 		t.text:SetFont("Fonts\\FRIZQT__.TTF", para.tickTextFontSize, "OUTLINE")
 		t.text:SetText(i*para.tickSpacing)
 	end
-
 end
-
 
 local FRAME_ID_COUNTER = 0
 local function createIconFrame()
@@ -259,7 +258,6 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 	frame:SetFrameLevel(bar:GetFrameLevel() + 4) -- set parent resets it
 
 	frame:SetScript("OnUpdate", frameOnUpdate)
-
 end
 
 local function compareExpTime(frame1, frame2)
@@ -399,8 +397,6 @@ function EW:updateFramePara(frame)
 	else
 		frame.icon:Hide()
 	end
-
-
 end
 
 function EW:removeAllFrames()
@@ -542,7 +538,6 @@ function EW:updateBarVisibility(n)
 		end
 	end
 end
-
 
 function EW:updateBarsVisibility()
 	for i = 1, 4 do self:updateBarVisibility(i) end

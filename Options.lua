@@ -979,7 +979,7 @@ local iconOptions = {
 					throwaway, icon = next(spell)
 				end
 			end
-			value = tostring(icon) or value
+			value = (icon and tostring(icon)) or value
 			opt:setSelectedIconPara('selectedIcon', value)
 		end,
 
