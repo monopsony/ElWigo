@@ -5,6 +5,7 @@ ElWigoAddon = LibStub("AceAddon-3.0"):NewAddon(
 
 local EW = ElWigoAddon
 local AceConfigDialog=LibStub("AceConfigDialog-3.0")
+local AceGUI = LibStub("AceGUI-3.0")
 
 local defaults = {
 	profile = {
@@ -23,6 +24,19 @@ local defaults = {
 				backgroundBorder = 'Blizzard Tooltip',
 				backgroundBorderSize = 8,			
 				backgroundBorderColor = {1, 1, 1, 1},
+
+				hideOutOfCombat = true,
+
+				hasTicks         = true,
+				aboveIcons       = true,
+				tickSpacing      = 5,
+				tickLength       = 20,
+				tickWidth        = 1,
+				tickColor        = {1, 1, 1, 1},
+				tickText         = true,
+				tickTextFontSize = 10,
+				tickTextPosition = 'LEFT',
+				tickTextColor    = {1, 1, 1, 1},
 			},
 
 			[2] = {
@@ -40,6 +54,17 @@ local defaults = {
 				backgroundBorderSize = 8,
 				backgroundBorderColor = {1, 1, 1, 1},
 				
+				hideOutOfCombat = true,
+				hasTicks         = true,
+				aboveIcons       = true,
+				tickSpacing      = 5,
+				tickLength       = 20,
+				tickWidth        = 1,
+				tickColor        = {1, 1, 1, 1},
+				tickText         = true,
+				tickTextFontSize = 10,
+				tickTextPosition = 'LEFT',
+				tickTextColor    = {1, 1, 1, 1},
 			},
 
 			[3] = {
@@ -56,7 +81,20 @@ local defaults = {
 				backgroundBorder = 'Blizzard Tooltip',
 				backgroundBorderSize = 8,
 				backgroundBorderColor = {1, 1, 1, 1},
+
+				hideOutOfCombat = true,
+				hasTicks         = true,
+				aboveIcons       = true,
+				tickSpacing      = 5,
+				tickLength       = 20,
+				tickWidth        = 1,
+				tickColor        = {1, 1, 1, 1},
+				tickText         = true,
+				tickTextFontSize = 10,
+				tickTextPosition = 'LEFT',
+				tickTextColor    = {1, 1, 1, 1},
 			},
+
 
 			[4] = {
 				shown      = false,
@@ -72,6 +110,18 @@ local defaults = {
 				backgroundBorder = 'Blizzard Tooltip',
 				backgroundBorderSize = 8,
 				backgroundBorderColor = {1, 1, 1, 1},
+
+				hideOutOfCombat = true,
+				hasTicks         = true,
+				aboveIcons       = true,
+				tickSpacing      = 5,
+				tickLength       = 20,
+				tickWidth        = 1,
+				tickColor        = {1, 1, 1, 1},
+				tickText         = true,
+				tickTextFontSize = 10,
+				tickTextPosition = 'LEFT',
+				tickTextColor    = {1, 1, 1, 1},
 			},
 		}, -- end of bars
 
@@ -100,12 +150,14 @@ local defaults = {
 					nameManual       = false,
 					nameManualEntry  = '',
 					automaticIcon    = true,
+					selectedIcon     = 134400,
 					bar              = 1,
 					customType       = 'Time',
 					customTimes      = {},
 					customPhaseTimes = {},
 					usePhaseCount    = false,
 				},
+
 				[2] = {
 					width            = 25,
 					height           = 25,
@@ -127,12 +179,14 @@ local defaults = {
 					nameManual       = false,
 					nameManualEntry  = '',
 					automaticIcon    = true,
+					selectedIcon     = 134400,
 					bar              = 2,
 					customType       = 'Time',
 					customTimes      = {},
 					customPhaseTimes = {},
 					usePhaseCount    = false,
 				},
+
 				[3] = {
 					width            = 35,
 					height           = 35,
@@ -154,12 +208,14 @@ local defaults = {
 					nameManual       = false,
 					nameManualEntry  = '',
 					automaticIcon    = true,
+					selectedIcon     = 134400,
 					bar              = 3,
 					customType       = 'Time',
 					customTimes      = {},
 					customPhaseTimes = {},
 					usePhaseCount    = false,
 				},
+
 				[4] = {
 					width            = 35,
 					height           = 35,
@@ -181,6 +237,7 @@ local defaults = {
 					nameManual       = false,
 					nameManualEntry  = '',
 					automaticIcon    = true,
+					selectedIcon     = 134400,
 					bar              = 4,
 					customType       = 'Time',
 					customTimes      = {},
@@ -200,6 +257,12 @@ local defaults = {
 function EW:OnInitialize()
 	self.db=LibStub("AceDB-3.0"):New("ElWigoDB", defaults, true)
 	self.para = self.db.profile
+
+	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
+	self.__aceOptions.args.profiles = profiles
+	for k,v in pairs(profiles) do print(k,v) end
+
+
 	self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
 	self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
 	self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
@@ -208,8 +271,10 @@ function EW:OnInitialize()
 
 	-- fill in info
 	self.encounterID = nil
-
 	self.bigWigs:registerAllMessages()
+
+	-- load BW raids 
+	self.options:updateBWRaidList()
 
 	-- UI
 	self:updateBars()
@@ -224,25 +289,54 @@ function EW:OnDisable()
 end
 
 function EW:RefreshConfig()
-	ReloadUI()
+	-- ReloadUI()
+	self.para = self.db.profile
+	self:updateBars()
+	--self.options:updateRaidListAll()
 end
 
 -- toad remove
 EW.engageID = 2329 -- Nyalotha Wrathion, BY DEFAULT FOR TESTING PURPOSES
+EW.optionsOpened = false
 function EW:chatCommandHandler(msg)
 	SlashCmdList.BigWigs()
 	AceConfigDialog:Close("BigWigs")
 	if BigWigsOptions:IsOpen() then BigWigsOptions:Open() end
 
-	EW.options:updateRaidList()
-	if AceConfigDialog.OpenFrames['ElWigo'] then
-		AceConfigDialog:Close('ElWigo')
+	--EW.options:updateRaidListAll()
+	if not self.optionsOpened then
+		local frame = AceGUI:Create("Frame")
+		self.currentOptionsFrame = frame
+
+		frame:Show()
+		frame:SetTitle("ElWigo")
+		frame:SetCallback("OnClose", function(widget)
+			AceGUI:Release(widget)
+			EW:optionsOnClose()
+		end)
+
+		AceConfigDialog:Open("ElWigo", frame)
+
+		self:optionsOnOpen()
+
 	else
-		AceConfigDialog:Open('ElWigo')
+		self.currentOptionsFrame:Hide()
+		self.currentOptionsFrame = nil
 	end
+
 	self.options:selectCurrentRaidBoss()
 end
 EW:RegisterChatCommand("ew","chatCommandHandler")
+
+function EW:optionsOnOpen()
+	self.optionsOpened = true
+	self:updateBarsVisibility()
+end
+
+function EW:optionsOnClose()
+	self.optionsOpened = false
+	self:updateBarsVisibility()
+end
 
 EW.eventFrame = CreateFrame("Frame", "ElWigoEventFrame", UIParent)
 EW.eventFrame:RegisterEvent("ENCOUNTER_START")

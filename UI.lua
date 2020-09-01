@@ -6,6 +6,7 @@ local tsort   = table.sort
 local tinsert = table.insert
 local unpack  = unpack
 local frameTemplate = nil -- change to "BackdropTemplate" in SL
+local IsEncounterInProgress = IsEncounterInProgress
 
 local LSM = LibStub:GetLibrary("LibSharedMedia-3.0")
 
@@ -18,12 +19,14 @@ end
 local function createBar(n)
 	local f = CreateFrame(
 		"Frame", ("ElWigoBar%s"):format(n), UIParent, frameTemplate)
+	f:SetFrameStrata("MEDIUM")
+
 	f.n = n
 	f.frames = {}
 
 	f.texture = f:CreateTexture(nil, "BACKGROUND")
 	f.texture:SetAllPoints()
-
+	f:SetFrameLevel(5)
 	return f
 end
 
@@ -33,12 +36,6 @@ function EW:updateBar(n)
 	if not EW.bars[n] then EW.bars[n] = createBar(n) end
 
 	local bar = EW.bars[n]
-	if not self.para.bars[n].shown then 
-		bar:Hide()
-	else
-		bar:Show()
-	end
-
 	local para = self.para.bars[n]
 	bar.para = para
 	bar.maxTime = para.maxTime
@@ -83,11 +80,53 @@ function EW:updateBar(n)
 		bar.y_mul       = 0
 	end
 	bar.lengthPerTime = para.length / para.maxTime
+
+	self:updateBarVisibility(n)
+
+	-- TICKS
+
+	bar.ticks = bar.ticks or {}
+	local ticks = bar.ticks
+	local N = max(#ticks, floor(para.maxTime/para.tickSpacing))
+	if para.maxTime % para.tickSpacing == 0 then N = N -1 end
+
+	for i = 1, N do 
+		ticks[i] = ticks[i] or CreateFrame("Frame", nil, bar, frameTemplate)
+		ticks[i]:SetFrameStrata("MEDIUM")
+		local t = ticks[i]
+		if para.hasTicks then t:Show() else t:Hide() end
+		t:SetFrameLevel(bar:GetFrameLevel() + ((para.aboveIcons and 6) or 1))
+		--t:SetFrameLevel(bar:GetFrameLevel() + 1)
+
+		local thicknessOffset = floor(para.tickWidth/2)
+		local l = i * para.tickSpacing * bar.lengthPerTime + thicknessOffset
+		t:SetPoint("TOP", bar, bar.endAnchor, bar.x_mul*l, bar.y_mul*l)
+		-- Why not just "CENTER": because then your minimum thickness is 2 pxs
+
+		t:SetSize(para.vertical and para.tickLength or para.tickWidth,
+			para.vertical and para.tickWidth or para.tickLength)
+
+		if not t.texture then t.texture = t:CreateTexture(nil, "BACKGROUND") end
+		t.texture:SetAllPoints()
+		t.texture:SetColorTexture(unpack(para.tickColor))
+
+		if not t.text then t.text = t:CreateFontString(nil, "BACKGROUND") end
+		if para.tickText then t:Show() else t:Hide() end
+		local a1, a2 = unpack(EW.utils.dirToAnchors[para.tickTextPosition])
+		t.text:ClearAllPoints()
+		t.text:SetPoint(a2, t, a1)
+
+		t.text:SetFont("Fonts\\FRIZQT__.TTF", para.tickTextFontSize, "OUTLINE")
+		t.text:SetText(i*para.tickSpacing)
+	end
+
 end
+
 
 local FRAME_ID_COUNTER = 0
 local function createIconFrame()
 	local f = CreateFrame("Frame", nil, UIParent, frameTemplate)
+	f:SetFrameStrata("MEDIUM")
 
 	f.icon = f:CreateTexture(nil, "BACKGROUND")
 	f.icon:SetAllPoints()
@@ -113,7 +152,8 @@ function EW:removeFrame(frame)
 	for i, v in ipairs(frames) do 
 		if v.id == id then tremove(frames, i); break end
 	end
-	
+	if #frames == 0 then self:updateBarVisibility(frame.bar.n) end
+
 	-- update anchors
 	self:updateAnchors(frame.bar)
 end
@@ -121,6 +161,7 @@ end
 local function moveFrame(frame, bar)
 	local t = frame.remDuration * bar.lengthPerTime
 	frame:SetPoint("CENTER", bar, bar.endAnchor, t*bar.x_mul, t*bar.y_mul)
+	--frame:SetFrameLevel(frame.bar:GetFrameLevel() + 4)
 end
 
 local function frameOnUpdate(frame)
@@ -211,11 +252,14 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 	frame.refreshRate = EW.para.refreshRate
 
 	tinsert(bar.frames, frame)
+	if #bar.frames == 1 then self:updateBarVisibility(para.bar) end
 	self:updateAnchors(bar)
 
 	frame:SetParent(bar)
+	frame:SetFrameLevel(bar:GetFrameLevel() + 4) -- set parent resets it
 
 	frame:SetScript("OnUpdate", frameOnUpdate)
+
 end
 
 local function compareExpTime(frame1, frame2)
@@ -315,6 +359,7 @@ function EW:updateFramePara(frame)
 	frame:SetBackdrop(bd)
 	frame:SetBackdropColor(unpack(para.color))
 	frame:SetBackdropBorderColor(unpack(para.borderColor))
+	frame:SetFrameLevel(frame.bar:GetFrameLevel() + 4)
 
 	-- toad font handling
 	frame.nameText:SetFont("Fonts\\FRIZQT__.TTF", para.nameFontSize, "OUTLINE")
@@ -343,7 +388,7 @@ function EW:updateFramePara(frame)
 	-- toad font handling
 	frame.durationText:SetFont(
 		"Fonts\\FRIZQT__.TTF", para.durationFontSize, "OUTLINE")
-	frame:SetFrameLevel(frame.bar:GetFrameLevel() + 1)
+
 	local a1, a2 = unpack(EW.utils.dirToAnchors[para.durationPosition])
 	frame.durationText:SetPoint(a2, frame, a1)
 	frame.durationText:SetTextColor(unpack(para.durationColor))
@@ -354,6 +399,8 @@ function EW:updateFramePara(frame)
 	else
 		frame.icon:Hide()
 	end
+
+
 end
 
 function EW:removeAllFrames()
@@ -375,7 +422,6 @@ end
 
 local function TEST(...)
 
-	print('TEST', ...)
 end
 
 function EW:startCustomTimers()
@@ -481,3 +527,40 @@ function EW:phaseTransition(stage)
 	self:startCustomPhaseTimers()
 end
 
+function EW:updateBarVisibility(n)
+	local bar  = self.bars[n]
+	local para = bar.para
+
+	if not para.shown then bar:Hide(); return end
+	if IsEncounterInProgress() or self.optionsOpened then 
+		bar:Show()
+	else
+		if para.hideOutOfCombat and #bar.frames < 1 then 
+			bar:Hide()
+		else
+			bar:Show()
+		end
+	end
+end
+
+
+function EW:updateBarsVisibility()
+	for i = 1, 4 do self:updateBarVisibility(i) end
+end
+
+function EW:selectedIconTest()
+
+	local optKey = self.options.selectedOptionKey
+	if optKey then 
+		local o = self.options.options[optKey]
+		if not o then return end
+
+		self:spawnIcon(o.id, o.name, 15 + (random(20) - 10), o.icon)
+	else
+		local barID = self.options.selectedBar
+		if not barID then return end
+
+		local para = self.para.icons.defaults[barID]
+		self:spawnIcon('Test', 'Test', 15 + (random(20) - 10), 134400, para)
+	end
+end

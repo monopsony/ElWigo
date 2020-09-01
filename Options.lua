@@ -16,25 +16,28 @@ local CopyTable                = CopyTable
 local SecondsToTime            = SecondsToTime
 local getNumberAfterUnderscore = EW.utils.getNumberAfterUnderscore
 local getNumberAfterSpace      = EW.utils.getNumberAfterSpace
+local GetMapInfo               = C_Map.GetMapInfo
 
 EW.options  = {}
 local opt   = EW.options
+opt.raids   = {}
 opt.options = {}
 
 opt.selectedOptionKey = nil
 opt.selectedBossID    = nil
 opt.selectedBar       = nil
+opt.selectedRaidID    = nil
 
 local function noOptionSelected()
 
 	return (opt.selectedOptionKey and true) or false 
 end
 
-local AceConfig       = LibStub("AceConfig-3.0")
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
-local AceGUI          = LibStub("AceGUI-3.0")
-local LSM             = LibStub:GetLibrary("LibSharedMedia-3.0")
-
+local AceConfig         = LibStub("AceConfig-3.0")
+local AceConfigDialog   = LibStub("AceConfigDialog-3.0")
+local AceGUI            = LibStub("AceGUI-3.0")
+local LSM               = LibStub:GetLibrary("LibSharedMedia-3.0")
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local generalOptions = {
 	refreshRate = {
 		type = 'range',
@@ -79,10 +82,10 @@ local aceOptions = {
 			name = 'Refresh',
 			type = 'execute',
 			desc = 'Refresh options to fix missing spell descriptions.',
-			func = function(...)
-				opt:updateRaidList(true)
-				AceConfigDialog:Open("ElWigo")
-				AceConfigDialog:Open("ElWigo")
+			func = function(tbl)
+				if not opt.selectedRaidID then return end
+				opt:updateRaidList(opt.selectedRaidID, true)
+				opt:refreshOptionsGUI()
 			end,
 		},
 
@@ -110,6 +113,7 @@ local aceOptions = {
 		},
 	}
 }
+EW.__aceOptions = aceOptions
 
 local barOptions = {
 
@@ -220,6 +224,19 @@ local barOptions = {
 		end,
 	},
 
+	hideOutOfCombat = {
+		type = 'toggle',
+		name = 'Idle hide',
+		order = 14,
+		desc = 'Hide bar out of encounter unless it has an active icon',
+		set = function(tbl, value)
+			opt:setSelectedBarPara('hideOutOfCombat', value, true)
+		end,
+		get = function()
+			return opt:getSelectedBarPara('hideOutOfCombat')
+		end,
+	},	
+
 	-- BACKGROUND
 	headerBackground = {
 		type = 'header',
@@ -324,7 +341,6 @@ local barOptions = {
 		order = 40,
 	},
 
-
 	border = {
 		order         = 41,
 		type          = 'select',
@@ -366,6 +382,199 @@ local barOptions = {
 			return unpack(opt:getSelectedBarPara('backgroundBorderColor'))
 		end,	
 	},
+
+	-- TICKS
+
+	headerTicks = {
+		type = 'header',
+		name = 'Ticks',
+		order = 50,
+	},
+
+	hasTicks = {
+		type = 'toggle',
+		name = 'Ticks',
+		order = 51,
+		desc = 'Enable to show ticks.',
+
+		set = function(tbl, value)
+			opt:setSelectedBarPara('hasTicks', value, true)
+		end,
+		get = function()
+			return opt:getSelectedBarPara('hasTicks')
+		end,
+	},	
+
+	aboveIcons = {
+		type = 'toggle',
+		name = 'Above',
+		order = 52,
+		desc = 'Enable to show ticks above icons',
+
+		set = function(tbl, value)
+			opt:setSelectedBarPara('aboveIcons', value, true)
+		end,
+		get = function()
+			return opt:getSelectedBarPara('aboveIcons')
+		end,
+	},	
+
+	tickSpacing = {
+		type = 'range',
+		name = 'Spacing',
+		order = 52,
+		desc = 'How much space (in seconds) between each tick.',
+
+		set = function(tbl, value)
+			opt:setSelectedBarPara('tickSpacing', value, true)
+		end,
+
+		get = function()
+			return opt:getSelectedBarPara('tickSpacing')
+		end,
+		min = 1,
+		softMax = 15,
+		step = 1,
+
+		disabled = function()
+			return not opt:getSelectedBarPara('hasTicks')
+		end,
+	},
+
+	tickLength = {
+		type = 'range',
+		name = 'Length',
+		order = 53,
+		min = 1,
+		softMax = 100,
+		step = 1,
+
+		set = function(tbl, value)
+			opt:setSelectedBarPara("tickLength", value, true)
+		end,
+
+		get = function()
+			return opt:getSelectedBarPara('tickLength')
+		end,
+
+		disabled = function()
+			return not opt:getSelectedBarPara('hasTicks')
+		end,
+	},	
+
+	tickWidth = {
+		type = 'range',
+		name = 'Thickness',
+		order = 54,
+		min = 1,
+		softMax = 10,
+		step = 0.5,
+
+		set = function(tbl, value)
+			opt:setSelectedBarPara("tickWidth", value, true)
+		end,
+
+		get = function()
+			return opt:getSelectedBarPara('tickWidth')
+		end,
+
+		disabled = function()
+			return not opt:getSelectedBarPara('hasTicks')
+		end,
+	},
+
+	tickColor = {
+		order  = 55,
+		type = 'color',
+		name = 'Tick color',
+
+		set = function(tbl, r, g, b, a)
+			opt:setSelectedBarPara('tickColor', {r,g,b,a}, true)
+		end,
+		get = function()
+			return unpack(opt:getSelectedBarPara('tickColor'))
+		end,	
+
+		disabled = function()
+			return not opt:getSelectedBarPara('hasTicks')
+		end,
+	},
+
+
+	tickText = {
+		order = 56,
+		type  = 'toggle',
+		desc  = 'Show remaining tick text.',
+		name  = 'Text',
+
+		set   = function(tbl, value)
+			opt:setSelectedBarPara('tickText', value, true)
+		end,
+		get   = function()
+			return opt:getSelectedBarPara('tickText')
+		end,	
+		disabled = function()
+			return not opt:getSelectedBarPara('hasTicks')
+		end,
+	},
+
+	tickTextFontSize = {
+		order   = 57,
+		type    = 'range',
+		desc    = 'Font size of the remaining tickText text.',
+		name    = 'Font size',
+		min     = 0,
+		softMax = 25,
+		step    = 1,
+
+		set     = function(tbl, value)
+			opt:setSelectedBarPara('tickTextFontSize', value, true)
+		end,
+		get     = function()
+			return opt:getSelectedBarPara('tickTextFontSize')
+		end,
+
+		disabled = function()
+			return (not opt:getSelectedBarPara('hasTicks'))
+				or (not opt:getSelectedBarPara('tickText'))
+		end,
+	},
+
+	tickTextPosition = {
+		order = 58,
+		type = 'select',
+		values = EW.utils.dirToAnchorValues,
+		name = 'Position',
+		set     = function(tbl, value)
+			opt:setSelectedBarPara('tickTextPosition', value, true)
+		end,
+		get     = function()
+			return opt:getSelectedBarPara('tickTextPosition')
+		end,
+		disabled = function()
+			return (not opt:getSelectedBarPara('hasTicks'))
+				or (not opt:getSelectedBarPara('tickText'))
+		end,				
+	},
+
+	tickTextColor = {
+		order  = 59,
+		type = 'color',
+		name = 'Text color',
+		desc = 'Color of the tick text.',
+		set           = function(tbl, r, g, b,a)
+			opt:setSelectedBarPara('tickTextColor', {r,g,b,a}, true)
+		end,
+		get           = function()
+			return unpack(opt:getSelectedBarPara('tickTextColor'))
+		end,	
+		disabled = function()
+			return (not opt:getSelectedBarPara('hasTicks'))
+				or (not opt:getSelectedBarPara('tickText'))
+		end,		
+	},
+
+
 }
 
 local iconOptions = {
@@ -396,6 +605,13 @@ local iconOptions = {
 			local o = opt.options[opt.selectedOptionKey]
 			return (o and o.icon) or 134400
 		end,
+	},
+
+	testButton = {
+		type = 'execute',
+		order = 3,
+		func = function() EW:selectedIconTest() end,
+		name = 'Test',
 	},
 
 	-- GENERAL
@@ -735,7 +951,7 @@ local iconOptions = {
 		order = 61,
 		type  = 'toggle',
 		desc  = 'Automatically set the icon to the ability icon (as provided by'
-			..' BigWigs).',
+			..' BigWigs, see top of the frame).',
 		name  = 'Automatic icon',
 		set   = function(tbl, value)
 			opt:setSelectedIconPara('automaticIcon', value)
@@ -743,6 +959,52 @@ local iconOptions = {
 		get   = function()
 			return opt:getSelectedIconPara('automaticIcon')
 		end,
+	},
+
+	iconSelect = {
+		order = 62,
+		type  = 'input',
+		name  = 'Icon',
+
+		disabled = function()
+			return opt:getSelectedIconPara("automaticIcon")
+		end,
+
+		set   = function(tbl, value)
+			local icon, throwaway
+			local string = tostring(value)
+			if string and WeakAurasOptionsSaved then 
+				local spell = WeakAurasOptionsSaved.spellCache[string]
+				if spell then 
+					throwaway, icon = next(spell)
+				end
+			end
+			value = tostring(icon) or value
+			opt:setSelectedIconPara('selectedIcon', value)
+		end,
+
+		get   = function()
+			return opt:getSelectedIconPara('selectedIcon')
+		end,
+		desc = 'Icon ID. In order to find those, go on wowhead and click on the'
+			..' spell icon, or select them in WAs and the icon ID is given in '
+			..'the tooltip. Proper selection in EW might come eventually.',
+		--pattern = '^%d+$',
+	},
+
+	iconShow = {
+		order = 63,
+		type = 'description',
+		name = '',
+		image = function()
+			return 	opt:getSelectedIconPara("selectedIcon")
+		end,
+		hidden = function()
+			return opt:getSelectedIconPara("automaticIcon")
+		end,
+		imageWidth = 40,
+		imageHeight = 40,
+		width = 0.3,
 	},
 }
 
@@ -1152,7 +1414,9 @@ local bossOptions = {
 			if nameInput == '' or nameInput:sub(1,2) == '__' then return end
 			opt:createNewElement(nameInput)
 			nameInput = ''
-			opt:updateRaidList()
+			opt:updateRaidList(opt.selectedRaidID, false, true)
+			-- second argument determines whether to refresh the BW info
+			-- third argument whether to refresh Ace table and custom options
 		end,
 	}
 }
@@ -1236,7 +1500,6 @@ function opt:setIconPara(optKey, paraKey, value)
 
 		EW.para.icons.defaults[bar][paraKey] = value
 	end
-
 end
 
 function opt:setSelectedIconPara(paraKey, value)
@@ -1247,6 +1510,11 @@ end
 function opt:getSelectedBarPara(paraKey)
 
 	return self:getBarPara(self.selectedBar, paraKey)
+end
+
+function opt:refreshOptionsGUI()
+
+	AceConfigDialog:Open("ElWigo", EW.currentOptionsFrame)
 end
 
 function opt:getBarPara(N, paraKey)
@@ -1271,21 +1539,20 @@ local function concatOptionName(bossName, optionName)
 	return ('%s_%s'):format(bossName, optionName)
 end
 
-function opt:getBWRaidList()
+function opt:updateBWRaidList()
 	local para = EW.para.bosses
 
 	-- NOTE:
 	-- This is (largely) taken from the bigwigs source code almost as is 
 	-- This is just used to have all the raid bosses that BW does
-	if self.raids then wipe(self.raids) end
-	local raids                = self.raids or {}
+	local raids                = self.raids
 	local loader               = BigWigsLoader
 	local zoneToId             = {}
 	local alphabeticalZoneList = {}
 	local zoneTbl              = loader.zoneTbl
+	local tree                 = aceOptions.args.bosses.args
 
 	for k in next, loader:GetZoneMenus() do
-
 		if zoneTbl[k] == 'BigWigs_BattleForAzeroth' 
 			or zoneTbl[k] == 'LittleWigs_BattleForAzeroth' then 
 
@@ -1315,14 +1582,69 @@ function opt:getBWRaidList()
 	for i = 1, #alphabeticalZoneList do
 		local zoneName = alphabeticalZoneList[i]
 		local id = zoneToId[zoneName]
-		raids[id] = {name = zoneName, bosses = {}}
+		raids[id] = {name = zoneName}
+
+		tree[tostring(id)] = {
+			name        = zoneName,
+			type        = 'group',
+			childGroups = 'tree',
+			args        = {
+				hidden = {
+					type = 'description',
+					name = 'hidden',
+					order = 0,
+					hidden = function()
+						opt.selectedRaidID = id
+						local refresh = opt:updateRaidList(id)
+						local d = AceConfigDialog
+						if refresh then opt:refreshOptionsGUI() end
+						return true
+					end,
+				},
+			},
+		}			
+
 	end
 
-	for id, _ in pairs(raids) do 
-		loader:LoadZone(id)
+	return raids
+end
+
+function opt:updateRaidListAll(force)
+	local raids  = self.raids
+	local tree = aceOptions.args.bosses.args
+	wipe(tree)
+	local bossesPara = EW.para.bosses
+
+	for raidID, raidInfo in pairs(raids) do 
+		self:updateRaidList(raidID)
+	end -- end of for raidID, raidInfo
+end
+
+function opt:updateRaidList(raidID, refreshInfo, refreshAce)
+	local bossesPara           = EW.para.bosses
+	local para                 = bossesPara
+	local raids                = self.raids
+	local loader               = BigWigsLoader
+	local zoneToId             = {}
+	local alphabeticalZoneList = {}
+	local zoneTbl              = loader.zoneTbl
+	local tree                 = aceOptions.args.bosses.args
+	local bosses               = tree[idString]
+	local idString             = tostring(raidID)
+
+	if not raids[raidID].bosses then 
+		refreshInfo = true
+		refreshAce = true
+		raids[raidID].bosses = {}
+	end
+	refreshAce = refreshInfo or refreshAce
+
+	-- BIGWIGS FILL INFO 
+	if refreshInfo then 
+		loader:LoadZone(raidID)
 
 		-- Grab the module list from this zone
-		local moduleList = loader:GetZoneMenus()[id]
+		local moduleList = loader:GetZoneMenus()[raidID]
 		if type(moduleList) ~= "table" then return end -- No modules registered
 
 		for i = 1, #moduleList do
@@ -1351,7 +1673,7 @@ function opt:getBWRaidList()
 						local oTbl = {
 							id        = o,
 							name      = name,
-							raidID    = id,
+							raidID    = raidID,
 							desc      = desc,
 							icon      = icon or 134400,
 							altName   = alternativeName,
@@ -1365,32 +1687,14 @@ function opt:getBWRaidList()
 					end
 				end
 
-				tinsert(raids[id].bosses, a)
-			end -- end of if module.engageId then 
+				tinsert(raids[raidID].bosses, a)
+			end -- end of if module.engageId then 	
 		end
-
-		tsort(raids[id].bosses, idSort)
 	end
 
-	self.raids = raids
-	return raids
-end
-
-function opt:updateRaidList(force)
-	local raids  = ((not force) and self.raids) or self:getBWRaidList()
-	local tree = aceOptions.args.bosses.args
-	wipe(tree)
-	local bossesPara = EW.para.bosses
-
-	for raidID, raidInfo in pairs(raids) do 
-		idString = tostring(raidID)
-		tree[idString] = {
-			name        = raidInfo.name,
-			type        = 'group',
-			childGroups = 'tree',
-			args        = {},
-		}		
-
+	-- FILL IN ACE OPTIONS
+	if refreshAce then 
+		local raidInfo = self.raids[raidID]
 		local bosses = tree[idString].args
 		local order  = 0
 		if raidInfo.bosses then 
@@ -1445,7 +1749,9 @@ function opt:updateRaidList(force)
 
 			end -- end of for _, boss
 		end -- end of if raidInfo.bosses
-	end -- end of for raidID, raidInfo
+	end -- end of refresh ace 
+
+	return refreshAce
 end
 
 function opt:selectCurrentRaidBoss()
