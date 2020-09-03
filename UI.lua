@@ -84,41 +84,51 @@ function EW:updateBar(n)
 	self:updateBarVisibility(n)
 
 	-- TICKS
-
 	bar.ticks = bar.ticks or {}
 	local ticks = bar.ticks
-	local N = max(#ticks, floor(para.maxTime/para.tickSpacing))
-	if para.maxTime % para.tickSpacing == 0 then N = N -1 end
+	local maxBars = floor(para.maxTime/para.tickSpacing)
+	if para.maxTime % para.tickSpacing == 0 then maxBars = maxBars - 1 end
+	local N = max(#ticks, maxBars)
+	
 
 	for i = 1, N do 
 		ticks[i] = ticks[i] or CreateFrame("Frame", nil, bar, frameTemplate)
 		ticks[i]:SetFrameStrata("MEDIUM")
 		local t = ticks[i]
-		if para.hasTicks then t:Show() else t:Hide() end
-		t:SetFrameLevel(bar:GetFrameLevel() + ((para.aboveIcons and 6) or 1))
-		--t:SetFrameLevel(bar:GetFrameLevel() + 1)
+		if (not para.hasTicks) or i > maxBars then 
+			t:Hide()
+		else
+			t:Show()
+			t:SetFrameLevel(bar:GetFrameLevel() + ((para.aboveIcons and 6) or 1))
+			--t:SetFrameLevel(bar:GetFrameLevel() + 1)
 
-		local thicknessOffset = floor(para.tickWidth/2)
-		local l = i * para.tickSpacing * bar.lengthPerTime + thicknessOffset
-		t:SetPoint("TOP", bar, bar.endAnchor, bar.x_mul*l, bar.y_mul*l)
-		-- Why not just "CENTER": because then your minimum thickness is 2 pxs
+			local thicknessOffset = floor(para.tickWidth/2)
+			local l = i * para.tickSpacing * bar.lengthPerTime + thicknessOffset
+			t:SetPoint("TOP", bar, bar.endAnchor, bar.x_mul*l, bar.y_mul*l)
+			-- Why not just "CENTER": because then your min thickness is 2 pxs
 
-		t:SetSize(para.vertical and para.tickLength or para.tickWidth,
-			para.vertical and para.tickWidth or para.tickLength)
+			t:SetSize(para.vertical and para.tickLength or para.tickWidth,
+				para.vertical and para.tickWidth or para.tickLength)
 
-		if not t.texture then t.texture = t:CreateTexture(nil, "BACKGROUND") end
-		t.texture:SetAllPoints()
-		t.texture:SetColorTexture(unpack(para.tickColor))
+			if not t.texture then 
+				t.texture = t:CreateTexture(nil, "BACKGROUND") 
+			end
+			t.texture:SetAllPoints()
+			t.texture:SetColorTexture(unpack(para.tickColor))
 
-		if not t.text then t.text = t:CreateFontString(nil, "BACKGROUND") end
-		if para.tickText then t:Show() else t:Hide() end
-		local a1, a2 = unpack(EW.utils.dirToAnchors[para.tickTextPosition])
-		t.text:ClearAllPoints()
-		t.text:SetPoint(a2, t, a1)
-		t.text:SetTextColor(unpack(para.tickTextColor))
+			if not t.text then 
+				t.text = t:CreateFontString(nil, "BACKGROUND") 
+			end
+			if para.tickText then t:Show() else t:Hide() end
+			local a1, a2 = unpack(EW.utils.dirToAnchors[para.tickTextPosition])
+			t.text:ClearAllPoints()
+			t.text:SetPoint(a2, t, a1)
+			t.text:SetTextColor(unpack(para.tickTextColor))
 
-		t.text:SetFont("Fonts\\FRIZQT__.TTF", para.tickTextFontSize, "OUTLINE")
-		t.text:SetText(i*para.tickSpacing)
+			t.text:SetFont(
+				"Fonts\\FRIZQT__.TTF", para.tickTextFontSize, "OUTLINE")
+			t.text:SetText(i*para.tickSpacing)
+		end
 	end
 end
 
