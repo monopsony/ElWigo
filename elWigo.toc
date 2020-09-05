@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 80300
 ## Title: elWigo
 ## Notes: Mierihn is gay
 ## Author: Gay
