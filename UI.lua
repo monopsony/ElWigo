@@ -208,8 +208,8 @@ local paraMetaTable = {
 	end
 }
 
-function EW:getIconPara(spellID)
-	local bossID    = self.engageID or 0
+function EW:getIconPara(spellID, engageID)
+	local bossID    = engageID or self.engageID or 0
 	local barID     = 1
 	local userPara  = {}
 
@@ -426,10 +426,6 @@ function EW:removeFrameByName(name, all)
 	end
 end
 
-local function TEST(...)
-
-end
-
 function EW:startCustomTimers()
 
 	if not self.engageID then return end
@@ -560,7 +556,8 @@ function EW:selectedIconTest()
 		local o = self.options.options[optKey]
 		if not o then return end
 
-		self:spawnIcon(o.id, o.name, 15 + (random(20) - 10), o.icon)
+		local para = self:getIconPara(o.id, self.options.selectedBossID)
+		self:spawnIcon(o.id, o.name, 15 + (random(20) - 10), o.icon, para)
 	else
 		local barID = self.options.selectedBar
 		if not barID then return end

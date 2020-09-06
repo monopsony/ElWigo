@@ -260,7 +260,6 @@ function EW:OnInitialize()
 
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	self.__aceOptions.args.profiles = profiles
-	for k,v in pairs(profiles) do print(k,v) end
 
 
 	self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")

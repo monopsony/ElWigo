@@ -1539,6 +1539,17 @@ local function concatOptionName(bossName, optionName)
 	return ('%s_%s'):format(bossName, optionName)
 end
 
+-- this is just used to put the raids in front of the dungeons in the boss list 
+-- doing it manually because seemingly theres no way to get instance info of 
+-- a given ID? Or Im just daft, idk
+local isRaidIDTable = {
+	[1861] = true, -- Uldir
+	[2070] = true, -- BfA
+	[2096] = true, -- CoS
+	[2164] = true, -- TEP
+	[2217] = true, -- Nyalotha
+}
+
 function opt:updateBWRaidList()
 	local para = EW.para.bosses
 
@@ -1567,7 +1578,6 @@ function opt:updateBWRaidList()
 			else
 				zone = GetRealZoneText(k)
 			end
-
 			if zone then
 				if zoneToId[zone] then
 					zone = zone .. "1" -- When instances exist more than once (Karazhan)
@@ -1578,15 +1588,17 @@ function opt:updateBWRaidList()
 		end
 	end 
 
-	sort(alphabeticalZoneList) -- Make alphabetical
 	for i = 1, #alphabeticalZoneList do
 		local zoneName = alphabeticalZoneList[i]
 		local id = zoneToId[zoneName]
 		raids[id] = {name = zoneName}
 
+		local order = isRaidIDTable[id] and 1 or 2
+
 		tree[tostring(id)] = {
 			name        = zoneName,
 			type        = 'group',
+			order       = order,
 			childGroups = 'tree',
 			args        = {
 				hidden = {
@@ -1643,6 +1655,7 @@ function opt:updateRaidList(raidID, refreshInfo, refreshAce)
 	if refreshInfo then 
 		loader:LoadZone(raidID)
 
+
 		-- Grab the module list from this zone
 		local moduleList = loader:GetZoneMenus()[raidID]
 		if type(moduleList) ~= "table" then return end -- No modules registered
@@ -1694,6 +1707,7 @@ function opt:updateRaidList(raidID, refreshInfo, refreshAce)
 
 	-- FILL IN ACE OPTIONS
 	if refreshAce then 
+
 		local raidInfo = self.raids[raidID]
 		local bosses = tree[idString].args
 		local order  = 0

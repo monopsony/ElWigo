@@ -6,6 +6,9 @@
 ## DefaultState: disabled
 ## SavedVariables: ElWigoDB
 
+## Dependencies: BigWigs
+
+
 libs.xml
 
 Core.lua
