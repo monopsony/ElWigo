@@ -351,5 +351,7 @@ EW.eventFrame:SetScript("OnEvent", function(self, event, ...)
 
 	if event == "ENCOUNTER_END" then 
 		EW:removeAllFrames()
+		local EW = EW
+		C_Timer.After(3, function() EW:updateBarsVisibility() end) -- arbitrary
 	end
 end)

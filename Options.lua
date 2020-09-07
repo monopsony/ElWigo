@@ -1773,11 +1773,15 @@ function opt:selectCurrentRaidBoss()
 	local raids = self.raids
 
 	local id = select(8, GetInstanceInfo()) or 0
+
 	local raid = raids[id]
 	if not raid then return end
 
 	local engageID = EW.engageID
 	local name
+	if not raid.bosses then 
+		opt:updateRaidList(id)
+	end
 	for _, v in ipairs(raid.bosses) do
 		if v.id == engageID then name = v.name end
 	end

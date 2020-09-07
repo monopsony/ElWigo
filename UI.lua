@@ -416,6 +416,7 @@ function EW:removeAllFrames()
 		for i = #v.frames,1,-1 do self:removeFrame(v.frames[i]) end
 	end
 	EW:CancelAllTimers()
+	EW:updateBarsVisibility() -- technically shouldnt be needed right?
 end
 
 function EW:removeFrameByName(name, all)
