@@ -233,6 +233,8 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 	local name, num = strip(name1)
 	local para = para or EW:getIconPara(spellID)
 
+	self:removeBarFrameByID(para.bar, spellID)
+
 	local frame = createIconFrame()
 	local bar   = self.bars[para.bar]
 	if not bar.para.shown then return end
@@ -420,7 +422,32 @@ function EW:removeFrameByName(name, all)
 	if not name then return end
 	for i, v in ipairs(self.bars) do
 		for i = #v.frames,1,-1 do 
-			if v.frames[i].name1 == name then self:removeFrame(v.frames[i]) end
+			if v.frames[i].name1 == name then
+				self:removeFrame(v.frames[i])
+				if not all then return end 
+			end
+		end
+	end
+end
+
+function EW:removeFrameByID(ID, all)
+	if not ID then return end
+	for i, v in ipairs(self.bars) do
+		for i = #v.frames,1,-1 do 
+			if v.frames[i].spellID == ID then
+				self:removeFrame(v.frames[i]) 
+				if not all then return end 
+			end
+		end
+	end
+end
+
+function EW:removeBarFrameByID(bar, ID, all)
+	if not ID then return end
+	local v = self.bars[bar]
+	for i = #v.frames,1,-1 do 
+		if v.frames[i].spellID == ID then
+			self:removeFrame(v.frames[i]) 
 			if not all then return end 
 		end
 	end

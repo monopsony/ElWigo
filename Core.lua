@@ -339,6 +339,7 @@ end
 
 EW.eventFrame = CreateFrame("Frame", "ElWigoEventFrame", UIParent)
 EW.eventFrame:RegisterEvent("ENCOUNTER_START")
+EW.eventFrame:RegisterEvent("ENCOUNTER_END")
 EW.eventFrame:SetScript("OnEvent", function(self, event, ...)
 	if event == "ENCOUNTER_START" then
 		local id = ...
@@ -346,5 +347,9 @@ EW.eventFrame:SetScript("OnEvent", function(self, event, ...)
 		EW.phaseCount = 0 -- EW:phaseTransition() increments it to 1
 		EW:startCustomTimers()
 		EW:phaseTransition(1)
+	end
+
+	if event == "ENCOUNTER_END" then 
+		EW:removeAllFrames()
 	end
 end)
