@@ -39,6 +39,7 @@ function EW:updateBar(n)
 	local para = self.para.bars[n]
 	bar.para = para
 	bar.maxTime = para.maxTime
+	bar.scheduledAnchorUpdate = 0
 
 	-- do the updating
 	bar:ClearAllPoints()
@@ -310,14 +311,14 @@ function EW:setFrameAnchor(frame1, frame2)
 end
 
 function EW:scheduleAnchorUpdate(bar)
-	if bar.scheduledAnchorUpdate then return end
-	bar.scheduledAnchorUpdate = true
+	local t = GetTime()
+	if bar.scheduledAnchorUpdate == t then return end
+	bar.scheduledAnchorUpdate = t
 	self:ScheduleTimer(self.updateAnchors, 0, self, bar)
 end
 
 function EW:updateAnchors(bar)
 	local frames = bar.frames
-	bar.scheduledAnchorUpdate = false
 
 	-- sort the frames
 	tsort(frames, compareExpTime)
@@ -424,10 +425,11 @@ function EW:removeAllFrames()
 	EW:CancelAllTimers()
 	EW:updateBarsVisibility() -- technically shouldnt be needed right?
 
-	-- this also canceled the schedules anchors updates, so put them back
+	-- this also canceled the scheduled anchors updates, so put them back
+	local t = GetTime()
 	for i = 1,4 do 
-		if self.bars[i].scheduledAnchorUpdate then 
-			self.bars[i].scheduledAnchorUpdate = false
+		if self.bars[i].scheduledAnchorUpdate == t then 
+			self.bars[i].scheduledAnchorUpdate = 0
 			self:scheduleAnchorUpdate(self.bars[i])
 		end
 	end
