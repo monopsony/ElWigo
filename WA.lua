@@ -113,7 +113,8 @@ function EW:prepareWA(wa, name)
 	wa.spawnTime = t
 	wa.size      = bar.vertical and wa.height or wa.width or wa.height or 20
 	wa.maxTime   = bar.maxTime
-
+	wa.expTime   = wa.state.expirationTime
+	
 	wa:ClearAllPoints()
 
 	local exp = wa.state.expirationTime
@@ -160,6 +161,7 @@ function EW:moveActiveWAs()
 	for i = 1,#atw do 
 		local f = atw[i]
 		local exp = f.state.expirationTime
+		f.expTime = exp
 		local rem = (exp and exp - t) or 1000
 		f.remDuration = rem
 		if not f.anchored then moveWA(f) end

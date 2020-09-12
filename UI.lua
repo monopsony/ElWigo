@@ -273,9 +273,9 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 end
 
 local function compareExpTime(frame1, frame2)
-	return ((frame1.expTime == frame2.expTime or 1000) 
-			and (frame1.id < frame2.id)) 
-			or (frame1.expTime < frame2.expTime or 1000)
+	return (((frame1.expTime or 1000) == (frame2.expTime or 1000)) 
+			and (tostring(frame1.id) < tostring(frame2.id)))
+			or ((frame1.expTime or 1000) < (frame2.expTime or 1000))
 end
 
 function EW:frameToQueue(frame)
