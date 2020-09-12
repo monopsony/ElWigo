@@ -89,19 +89,54 @@ local aceOptions = {
 			end,
 		},
 
-		general= {
-			order = 10,
-			name  = 'General',
-			type  = 'group',
-			args  = generalOptions,
-		},
+		--general= {
+		--	order = 10,
+		--	name  = 'General',
+		--	type  = 'group',
+		--	args  = generalOptions,
+		--},
 
 		bars= {
 			order = 11,
-			name  = 'Bars',
+			name  = 'General',
 			type  = 'group',
 			childGroups = 'tree',
-			args  = {},
+			args  = {
+				general = {
+					name = 'General',
+					type = 'group',
+					order = 1,
+					args = generalOptions,
+				},
+
+				-- bars will come in between
+
+				WA = {
+					name = 'WeakAuras',
+					type = 'group',
+					order = 20,
+					args = {
+						help = {
+							type = 'description',
+							order = 20,
+							name = 'WeakAuras can be tracked in ElWigo bars by'
+								..'adding a "EW<N>__" prefix to a WA name, '
+								..'where <N> denotes the bar the WA should be '
+								..'displayed on. \n'
+								..'For example: calling your aura "EW2__name" '
+								..'will automatically display the aura on the '
+								..'second EW bar, if it is active. This should '
+								..'work for any WA regardless of settings, as '
+								..'long as the aura\'s position is not altered '
+								..'dynamically (e.g. dynamic groups).\n \n'
+								..'If additional options for WA tracking are '
+								..'added in the future, they will be found here'
+								..'.'
+						},
+					},
+				},
+
+			},
 		},
 
 		bosses= {
@@ -1016,7 +1051,7 @@ do
 		args[barID] = {
 			type = "group",
 			name = barID,
-			order = i*10,
+			order = 10 + i,
 			childGroups = 'tab',
 			args = {
 				hidden = {

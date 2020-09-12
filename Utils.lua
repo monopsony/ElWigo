@@ -1,3 +1,5 @@
+local tremove = table.remove
+
 local EW = ElWigoAddon
 EW.utils = {}
 local ut = EW.utils
@@ -65,4 +67,32 @@ ut.dirToAnchorValues = {
 	RIGHT  = "Right",
 	CENTER = "Center",
 }
+
+function ut.isInTable(tbl, v)
+	for i = 1, #tbl do 
+		if tbl[i] == v then return true end
+	end
+	return false
+end
+local isInTable = ut.isInTable
+
+function ut.includeInTable(tbl, v)
+	if not isInTable(tbl, v) then
+		tbl[#tbl + 1] = v 
+	end
+end
+
+function ut.removeFromTable(tbl, v)
+	for i = 1, #tbl do 
+		if tbl[i] == v then 
+			tremove(tbl, i)
+			return
+		end
+	end
+end
+
+function ut.isWANameEW(name)
+	local match = name:match("^EW(%d)__.*")
+	return match and tonumber(match) or nil
+end
 

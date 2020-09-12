@@ -157,14 +157,14 @@ function EW:removeFrame(frame)
 
 	-- pop it
 	local id = frame.id
-	local frames = frame.bar.frames
+	local frames = frame.bar_.frames
 	for i, v in ipairs(frames) do 
 		if v.id == id then tremove(frames, i); break end
 	end
-	if #frames == 0 then self:updateBarVisibility(frame.bar.n) end
+	if #frames == 0 then self:updateBarVisibility(frame.bar_.n) end
 
 	-- update anchors
-	self:updateAnchors(frame.bar)
+	self:scheduleAnchorUpdate(frame.bar_)
 end
 
 local function moveFrame(frame, bar)
@@ -189,7 +189,7 @@ local function frameOnUpdate(frame)
 	end
 
 	-- MOVE FRAME
-	if not frame.anchored then moveFrame(frame, frame.bar) end
+	if not frame.anchored then moveFrame(frame, frame.bar_) end
 
 	if t > frame.expTime then 
 		EW:removeFrame(frame)
@@ -197,7 +197,7 @@ local function frameOnUpdate(frame)
 
 	if frame.headQueue and (frame.remDuration < frame.maxTime) then 
 		frame.headQueue = false
-		EW:updateAnchors(frame.bar)
+		EW:scheduleAnchorUpdate(frame.bar_)
 	end
 end
 
@@ -241,7 +241,7 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 
 	frame:Show()
 
-	frame.bar       = bar
+	frame.bar_      = bar
 	frame.para      = para
 	frame.name      = name
 	frame.name1     = name1
@@ -264,7 +264,7 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 
 	tinsert(bar.frames, frame)
 	if #bar.frames == 1 then self:updateBarVisibility(para.bar) end
-	self:updateAnchors(bar)
+	self:scheduleAnchorUpdate(bar)
 
 	frame:SetParent(bar)
 	frame:SetFrameLevel(bar:GetFrameLevel() + 4) -- set parent resets it
@@ -273,13 +273,14 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
 end
 
 local function compareExpTime(frame1, frame2)
-	return ((frame1.expTime == frame2.expTime) and (frame1.id < frame2.id)) 
-		or (frame1.expTime < frame2.expTime)
+	return ((frame1.expTime == frame2.expTime or 1000) 
+			and (frame1.id < frame2.id)) 
+			or (frame1.expTime < frame2.expTime or 1000)
 end
 
 function EW:frameToQueue(frame)
 	if not frame then return end
-	local bar = frame.bar
+	local bar = frame.bar_
 	frame.anchored  = true 
 	frame.anchor    = bar
 	frame.headQueue = true
@@ -298,7 +299,7 @@ function EW:setFrameAnchor(frame1, frame2)
 		frame1.anchored = true
 		frame1.anchor   = frame2
 
-		local bar  = frame1.bar
+		local bar  = frame1.bar_
 		local dist = frame1.size/2 + frame2.size/2
 		
 		frame1:SetPoint("CENTER", frame2, "CENTER", 
@@ -308,8 +309,15 @@ function EW:setFrameAnchor(frame1, frame2)
 	end
 end
 
+function EW:scheduleAnchorUpdate(bar)
+	if bar.scheduledAnchorUpdate then return end
+	bar.scheduledAnchorUpdate = true
+	self:ScheduleTimer(self.updateAnchors, 0, self, bar)
+end
+
 function EW:updateAnchors(bar)
 	local frames = bar.frames
+	bar.scheduledAnchorUpdate = false
 
 	-- sort the frames
 	tsort(frames, compareExpTime)
@@ -321,10 +329,8 @@ function EW:updateAnchors(bar)
 	local maxExp        = GetTime() + maxTime
 
 	for i, v in ipairs(frames) do 
-
 		-- if below max time
-		if v.expTime <= maxExp then
-
+		if v.expTime and v.expTime <= maxExp then
 			if i == 1 then -- if first frame
 				self:setFrameAnchor(v, nil)
 			else
@@ -369,7 +375,7 @@ function EW:updateFramePara(frame)
 	frame:SetBackdrop(bd)
 	frame:SetBackdropColor(unpack(para.color))
 	frame:SetBackdropBorderColor(unpack(para.borderColor))
-	frame:SetFrameLevel(frame.bar:GetFrameLevel() + 4)
+	frame:SetFrameLevel(frame.bar_:GetFrameLevel() + 4)
 
 	-- toad font handling
 	frame.nameText:SetFont("Fonts\\FRIZQT__.TTF", para.nameFontSize, "OUTLINE")
@@ -453,6 +459,18 @@ function EW:removeBarFrameByID(bar, ID, all)
 		end
 	end
 end
+
+function EW:removeBarFrameByName(bar, name, all)
+	if not name then return end
+	local v = self.bars[bar]
+	for i = #v.frames,1,-1 do 
+		if v.frames[i].name == name then
+			self:removeFrame(v.frames[i]) 
+			if not all then return end 
+		end
+	end
+end
+
 
 function EW:startCustomTimers()
 
@@ -594,3 +612,6 @@ function EW:selectedIconTest()
 		self:spawnIcon('Test', 'Test', 15 + (random(20) - 10), 134400, para)
 	end
 end
+
+
+

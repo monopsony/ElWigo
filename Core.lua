@@ -127,6 +127,8 @@ local defaults = {
 
 		refreshRate = .05,
 
+		trackedWAs = {},
+
 		icons = {
 			defaults = { -- defaults for each bar
 				[1] = {
@@ -277,7 +279,10 @@ function EW:OnInitialize()
 
 	-- UI
 	self:updateBars()
+
 end 
+
+
 
 function EW:OnEnable()
 	-- 
@@ -340,6 +345,7 @@ end
 EW.eventFrame = CreateFrame("Frame", "ElWigoEventFrame", UIParent)
 EW.eventFrame:RegisterEvent("ENCOUNTER_START")
 EW.eventFrame:RegisterEvent("ENCOUNTER_END")
+EW.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 EW.eventFrame:SetScript("OnEvent", function(self, event, ...)
 	if event == "ENCOUNTER_START" then
 		local id = ...
@@ -347,11 +353,16 @@ EW.eventFrame:SetScript("OnEvent", function(self, event, ...)
 		EW.phaseCount = 0 -- EW:phaseTransition() increments it to 1
 		EW:startCustomTimers()
 		EW:phaseTransition(1)
-	end
 
-	if event == "ENCOUNTER_END" then 
+	elseif event == "ENCOUNTER_END" then 
 		EW:removeAllFrames()
 		local EW = EW
 		C_Timer.After(3, function() EW:updateBarsVisibility() end) -- arbitrary
+
+	elseif event == "PLAYER_ENTERING_WORLD" then 
+
+		-- WA
+		EW:hookWANameUpdate()
+		EW:updateTrackedWAs()
 	end
 end)

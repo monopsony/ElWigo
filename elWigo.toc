@@ -2,12 +2,11 @@
 ## Title: elWigo
 ## Notes: Mierihn is gay
 ## Author: Gay
-## Version: v0.1
+## Version: v1.1.0
 ## DefaultState: disabled
 ## SavedVariables: ElWigoDB
-
 ## Dependencies: BigWigs
-
+## OptionalDeps: WeakAuras
 
 libs.xml
 
@@ -16,4 +15,5 @@ Utils.lua
 
 BigWigs.lua
 UI.lua
+WA.lua
 Options.lua
