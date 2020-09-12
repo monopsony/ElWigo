@@ -423,6 +423,14 @@ function EW:removeAllFrames()
 	end
 	EW:CancelAllTimers()
 	EW:updateBarsVisibility() -- technically shouldnt be needed right?
+
+	-- this also canceled the schedules anchors updates, so put them back
+	for i = 1,4 do 
+		if self.bars[i].scheduledAnchorUpdate then 
+			self.bars[i].scheduledAnchorUpdate = false
+			self:scheduleAnchorUpdate(self.bars[i])
+		end
+	end
 end
 
 function EW:removeFrameByName(name, all)
