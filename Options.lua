@@ -670,6 +670,10 @@ local iconOptions = {
 		get     = function()
 			return opt:getSelectedIconPara('bar')
 		end,
+
+		disabled = function()
+			return not opt.selectedOptionKey
+		end,
 	},
 
 	size = {
