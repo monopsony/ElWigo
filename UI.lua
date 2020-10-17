@@ -5,7 +5,7 @@ local tremove = table.remove
 local tsort   = table.sort
 local tinsert = table.insert
 local unpack  = unpack
-local frameTemplate = nil -- change to "BackdropTemplate" in SL
+local frameTemplate = 'BackdropTemplate' -- change to "BackdropTemplate" in SL
 local IsEncounterInProgress = IsEncounterInProgress
 
 local LSM = LibStub:GetLibrary("LibSharedMedia-3.0")
