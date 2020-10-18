@@ -1461,7 +1461,6 @@ local bossOptions = {
 }
 
 AceConfig:RegisterOptionsTable('ElWigo',aceOptions)
-AceConfigDialog:AddToBlizOptions('ElWigo','ElWigo')
 
 local function idSort(a, b)
 

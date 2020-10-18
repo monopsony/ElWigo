@@ -331,6 +331,7 @@ function EW:chatCommandHandler(msg)
 	self.options:selectCurrentRaidBoss()
 end
 EW:RegisterChatCommand("ew","chatCommandHandler")
+EW:RegisterChatCommand("elwigo","chatCommandHandler")
 
 function EW:optionsOnOpen()
 	self.optionsOpened = true
