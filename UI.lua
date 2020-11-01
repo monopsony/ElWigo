@@ -184,9 +184,14 @@ local function frameOnUpdate(frame)
 
 
 	-- UPDATE REM. DURATION
-	frame.remDuration = frame.expTime - t
+	local dur = frame.expTime - t
+	frame.remDuration = dur
 	if para.duration then 
-		frame.durationText:SetText(("%i"):format(frame.remDuration))
+		if dur <= 60 then
+			frame.durationText:SetText(("%i"):format(dur))
+		else
+			frame.durationText:SetText(("%i:%02i"):format(dur/60, dur%60))
+		end
 	end
 
 	-- MOVE FRAME
