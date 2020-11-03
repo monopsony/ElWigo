@@ -2,7 +2,7 @@
 ## Title: elWigo
 ## Notes: Mierihn is gay
 ## Author: Gay
-## Version: v1.1.0
+## Version: v1.1.6
 ## DefaultState: disabled
 ## SavedVariables: ElWigoDB
 ## Dependencies: BigWigs

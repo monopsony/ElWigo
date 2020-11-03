@@ -165,6 +165,12 @@ function EW:moveActiveWAs()
 		local rem = (exp and exp - t) or 1000
 		f.remDuration = rem
 		if not f.anchored then moveWA(f) end
+
+		if f.headQueue and (f.remDuration < f.maxTime) then 
+			f.headQueue = false
+			EW:scheduleAnchorUpdate(f.bar_)
+		end
+
 	end
 end
 
