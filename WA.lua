@@ -89,6 +89,7 @@ function EW:getWAName(name)
 	return ('__WA%s'):format(name)
 end
 
+
 function EW:prepareWA(wa, name)
 	wa.para = {
 		bar = self.trackedWAs[name]
@@ -164,12 +165,6 @@ function EW:moveActiveWAs()
 		local rem = (exp and exp - t) or 1000
 		f.remDuration = rem
 		if not f.anchored then moveWA(f) end
-
-		if f.headQueue and (f.remDuration < f.maxTime) then 
-			f.headQueue = false
-			EW:scheduleAnchorUpdate(f.bar_)
-		end
-
 	end
 end
 
