@@ -3,96 +3,111 @@ local tremove = table.remove
 local EW = ElWigoAddon
 EW.utils = {}
 local ut = EW.utils
-	
+
 local ssub = string.sub
 function ut.stringStrip(s)
-	if not s then return '' end
+    if not s then
+        return ""
+    end
 
-	local num = s:match("%((%d+)%)")
+    local num = s:match("%((%d+)%)")
 
-	local s = s:gsub("(%(%d+%))", "")
+    local s = s:gsub("(%(%d+%))", "")
 
-	return s, tonumber(num or -1)
+    return s, tonumber(num or -1)
 end
 
 function ut.acronym(s)
-	if not s then return '' end
-	local sNew = s
-		:gsub(" of ","")
-		:gsub(" for ","")
-		:gsub(" and ","")
-		:gsub(" the ","")
-		:gsub(" to ","")
-		:gsub("<", "")
-		:gsub(">", "")
-		:gsub("%)", " %)")
-		:gsub("%(", "%( ")
-		:gsub("(%w)%S*%s*","%1")
-		:upper()
+    if not s then
+        return ""
+    end
+    local sNew =
+        s:gsub(" of ", ""):gsub(" for ", ""):gsub(" and ", ""):gsub(" the ", ""):gsub(
+        " to ",
+        ""
+    ):gsub("<", ""):gsub(">", ""):gsub("%)", " %)"):gsub("%(", "%( "):gsub(
+        "(%w)%S*%s*",
+        "%1"
+    ):upper()
 
-	return sNew
+    return sNew
 end
 
 function ut.removeBracketsNumber(s)
-	if not s then return '' end
-	local sNew = s:gsub("(%(%d+%))","")
+    if not s then
+        return ""
+    end
+    local sNew = s:gsub("(%(%d+%))", "")
 
-	return sNew
+    return sNew
 end
 
 function ut.getNumberAfterUnderscore(s)
-	if not s then return nil end
-	local N = s:match(".*_(%d+)$")
-	if N then return tonumber(N) else return nil end
+    if not s then
+        return nil
+    end
+    local N = s:match(".*_(%d+)$")
+    if N then
+        return tonumber(N)
+    else
+        return nil
+    end
 end
 
 function ut.getNumberAfterSpace(s)
-	if not s then return nil end
-	local N = s:match(".*%s(%d+)$")
-	if N then return tonumber(N) else return nil end
+    if not s then
+        return nil
+    end
+    local N = s:match(".*%s(%d+)$")
+    if N then
+        return tonumber(N)
+    else
+        return nil
+    end
 end
 
 ut.dirToAnchors = {
-	ABOVE  = {"TOP", "BOTTOM"},
-	BELOW  = {"BOTTOM", "TOP"},
-	LEFT   = {"LEFT", "RIGHT"},
-	RIGHT  = {"RIGHT", "LEFT"},
-	CENTER = {"CENTER", "CENTER"}
+    ABOVE = {"TOP", "BOTTOM"},
+    BELOW = {"BOTTOM", "TOP"},
+    LEFT = {"LEFT", "RIGHT"},
+    RIGHT = {"RIGHT", "LEFT"},
+    CENTER = {"CENTER", "CENTER"}
 }
 
 ut.dirToAnchorValues = {
-	ABOVE  = "Above",
-	BELOW  = "Below",
-	LEFT   = "Left",
-	RIGHT  = "Right",
-	CENTER = "Center",
+    ABOVE = "Above",
+    BELOW = "Below",
+    LEFT = "Left",
+    RIGHT = "Right",
+    CENTER = "Center"
 }
 
 function ut.isInTable(tbl, v)
-	for i = 1, #tbl do 
-		if tbl[i] == v then return true end
-	end
-	return false
+    for i = 1, #tbl do
+        if tbl[i] == v then
+            return true
+        end
+    end
+    return false
 end
 local isInTable = ut.isInTable
 
 function ut.includeInTable(tbl, v)
-	if not isInTable(tbl, v) then
-		tbl[#tbl + 1] = v 
-	end
+    if not isInTable(tbl, v) then
+        tbl[#tbl + 1] = v
+    end
 end
 
 function ut.removeFromTable(tbl, v)
-	for i = 1, #tbl do 
-		if tbl[i] == v then 
-			tremove(tbl, i)
-			return
-		end
-	end
+    for i = 1, #tbl do
+        if tbl[i] == v then
+            tremove(tbl, i)
+            return
+        end
+    end
 end
 
 function ut.isWANameEW(name)
-	local match = name:match("^EW(%d)__.*")
-	return match and tonumber(match) or nil
+    local match = name:match("^EW(%d)__.*")
+    return match and tonumber(match) or nil
 end
-
