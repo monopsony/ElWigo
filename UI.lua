@@ -244,7 +244,6 @@ function EW:getIconPara(spellID, engageID)
     local bossID = engageID or self.engageID or 0
     local barID = 1
     local userPara = {}
-
     if self.para.bosses[bossID] and self.para.bosses[bossID][spellID] then
         barID = self.para.bosses[bossID][spellID]["bar"] or 1
         userPara = self.para.bosses[bossID][spellID]

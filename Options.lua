@@ -519,6 +519,8 @@ local iconOptions = {
         name = "hidden",
         hidden = function(tbl)
             opt.selectedOptionKey = tbl[4]
+            local _, bossID = opt:getSelectedRaidBossIDs(tbl)
+            opt.selectedBossID = bossID
             return true
         end
     },
@@ -1384,7 +1386,6 @@ function opt:setIconPara(optKey, paraKey, value)
     if optKey then
         local o = self.options[optKey]
         local bossID, id = o.bossID, o.id
-
         local optO = EW.para.bosses[bossID][id]
         if not optO then
             EW.para.bosses[bossID][id] = {}

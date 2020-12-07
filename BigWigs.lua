@@ -48,12 +48,6 @@ function BW:barCreated(table1, bar, _, name1, name2, duration, icon)
     end
 end
 
-function BW:barCreated2(table1, bar, _, name1, name2, duration, icon)
-    if EW.para.hideBW then
-        bar:Hide()
-    end
-end
-
 function BW:message(key, text, color, icon)
     if key == "stages" then
         EW:phaseTransition(text)
