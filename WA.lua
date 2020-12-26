@@ -150,7 +150,6 @@ end
 
 function EW:notifyWAShow(name, shown)
     local f = getWARegion(name)
-
     if shown then
         self:prepareWA(f, name)
         trackWA(f)

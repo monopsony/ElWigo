@@ -716,6 +716,20 @@ local iconOptions = {
             return unpack(opt:getSelectedIconPara("durationColor"))
         end
     },
+    durationFont = {
+        name = "Font",
+        type = "select",
+        style = "dropdown",
+        dialogControl = "LSM30_Font",
+        order = 35,
+        values = LSM:HashTable("font"),
+        set = function(tbl, value)
+            opt:setSelectedIconPara("durationFont", value)
+        end,
+        get = function()
+            return opt:getSelectedIconPara("durationFont")
+        end
+    },
     -- NAME
     separatorName = {order = 40, type = "header", name = "Name Text"},
     nameText = {
@@ -844,7 +858,21 @@ local iconOptions = {
             return (not name) or (not manual)
         end
     },
-    -- NAME
+    nameFont = {
+        name = "Font",
+        type = "select",
+        style = "dropdown",
+        dialogControl = "LSM30_Font",
+        order = 49,
+        values = LSM:HashTable("font"),
+        set = function(tbl, value)
+            opt:setSelectedIconPara("nameFont", value)
+        end,
+        get = function()
+            return opt:getSelectedIconPara("nameFont")
+        end
+    },
+    -- ICON
     separatorIcon = {order = 60, type = "header", name = "Icon"},
     automaticIcon = {
         order = 61,

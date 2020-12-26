@@ -112,7 +112,15 @@ function EW:updateBar(n)
 
             local thicknessOffset = floor(para.tickWidth / 2)
             local l = i * para.tickSpacing * bar.lengthPerTime + thicknessOffset
-            t:SetPoint("TOP", bar, bar.endAnchor, bar.x_mul * l, bar.y_mul * l)
+
+            t:SetPoint(
+                para.vertical and "TOP" or "RIGHT",
+                bar,
+                bar.endAnchor,
+                bar.x_mul * l,
+                bar.y_mul * l
+            )
+
             -- Why not just "CENTER": because then your min thickness is 2 pxs
 
             t:SetSize(
@@ -421,8 +429,8 @@ function EW:updateFramePara(frame)
     frame:SetBackdropBorderColor(unpack(para.borderColor))
     frame:SetFrameLevel(frame.bar_:GetFrameLevel() + 4)
 
-    -- toad font handling
-    frame.nameText:SetFont("Fonts\\FRIZQT__.TTF", para.nameFontSize, "OUTLINE")
+    local font = LSM:Fetch("font", para.nameFont) or "Fonts\\FRIZQT__.TTF"
+    frame.nameText:SetFont(font, para.nameFontSize, "OUTLINE")
     frame.nameText:ClearAllPoints()
     local a1, a2 = unpack(EW.utils.dirToAnchors[para.namePosition])
     frame.nameText:SetPoint(a2, frame, a1)
@@ -449,12 +457,8 @@ function EW:updateFramePara(frame)
         frame.nameText:SetText("")
     end
 
-    -- toad font handling
-    frame.durationText:SetFont(
-        "Fonts\\FRIZQT__.TTF",
-        para.durationFontSize,
-        "OUTLINE"
-    )
+    local font = LSM:Fetch("font", para.durationFont) or "Fonts\\FRIZQT__.TTF"
+    frame.durationText:SetFont(font, para.durationFontSize, "OUTLINE")
 
     local a1, a2 = unpack(EW.utils.dirToAnchors[para.durationPosition])
     frame.durationText:SetPoint(a2, frame, a1)
@@ -463,7 +467,7 @@ function EW:updateFramePara(frame)
     if para.automaticIcon then
         frame.icon:SetTexture(frame.iconID)
     else
-        frame.icon:Hide()
+        frame.icon:SetTexture(para.selectedIcon or 134400)
     end
 end
 
