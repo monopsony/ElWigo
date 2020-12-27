@@ -1,7 +1,7 @@
 local EW = ElWigoAddon
 EW.bigWigs = {}
 local BW = EW.bigWigs
-
+local IsInInstance = IsInInstance
 LibStub("AceEvent-3.0"):Embed(BW)
 
 -- register bigwigs messages
@@ -26,15 +26,33 @@ function BW:dummyFunction(...)
 end
 
 function BW:startBar(_, spellID, name, duration, icon)
+    if EW.para.ignoreDungeons then
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party") then
+            return
+        end
+    end
     -- toad remove
     EW:spawnIcon(spellID, name, duration, icon)
 end
 
 function BW:stopBar(table1, name)
+    if EW.para.ignoreDungeons then
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party") then
+            return
+        end
+    end
     EW:removeFrameByName(name)
 end
 
 function BW:stopBars(...)
+    if EW.para.ignoreDungeons then
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party") then
+            return
+        end
+    end
     EW:removeAllFrames()
 end
 
@@ -43,12 +61,29 @@ function BW:onBossDisable(...)
 end
 
 function BW:barCreated(table1, bar, _, name1, name2, duration, icon)
+    if EW.para.ignoreDungeons then
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party") then
+            return
+        end
+    end
     if EW.para.hideBW then
-        bar:Hide()
+        -- bar:Hide()
+        if EW.para.preserveExtras then
+            bar:SetAlpha(0)
+        else
+            bar:Hide()
+        end
     end
 end
 
 function BW:message(key, text, color, icon)
+    if EW.para.ignoreDungeons then
+        local inInstance, instanceType = IsInInstance()
+        if inInstance and (instanceType == "party") then
+            return
+        end
+    end
     if key == "stages" then
         EW:phaseTransition(text)
     end

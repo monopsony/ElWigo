@@ -112,7 +112,7 @@ function EW:updateBar(n)
 
             local thicknessOffset = floor(para.tickWidth / 2)
             local l = i * para.tickSpacing * bar.lengthPerTime + thicknessOffset
-
+            t:ClearAllPoints()
             t:SetPoint(
                 para.vertical and "TOP" or "RIGHT",
                 bar,
@@ -232,9 +232,16 @@ local function frameOnUpdate(frame)
         EW:removeFrame(frame)
     end
 
-    if frame.headQueue and (frame.remDuration < frame.maxTime) then
-        frame.headQueue = false
-        EW:scheduleAnchorUpdate(frame.bar_)
+    if frame.headQueue then
+        if (frame.remDuration < frame.maxTime) then
+            frame.headQueue = false
+            EW:scheduleAnchorUpdate(frame.bar_)
+        elseif frame.smoothQueueing then
+            local effRemDuration = frame.effectiveExpTime - t
+            if effRemDuration <= frame.maxTime then
+                EW:pinHeadQueue(frame)
+            end
+        end
     end
 end
 
@@ -294,6 +301,7 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
     frame.expTime = GetTime() + duration
     frame.iconID = iconID
     frame.maxTime = bar.maxTime
+    frame.smoothQueueing = self.para.smoothQueueing
     self:updateFramePara(frame)
 
     frame.effectiveExpTime = frame.expTime
@@ -320,14 +328,10 @@ local function compareExpTime(frame1, frame2)
         ((frame1.expTime or 1000) < (frame2.expTime or 1000))
 end
 
-function EW:frameToQueue(frame)
-    if not frame then
-        return
-    end
+function EW:pinHeadQueue(frame)
     local bar = frame.bar_
     frame.anchored = true
     frame.anchor = bar
-    frame.headQueue = true
     frame:SetPoint("CENTER", bar, bar.startAnchor)
 end
 
@@ -398,15 +402,61 @@ function EW:updateAnchors(bar)
             end
         else
             -- if first frame in queue
+
             if not aboveMax then
-                self:frameToQueue(v)
+                v.headQueue = true
                 aboveMax = true
+            end
+
+            if (i == 1) then
+                self:pinHeadQueue(v)
             else
                 local prev = frames[i - 1]
-                self:setFrameAnchor(v, prev)
+                if (not self.para.smoothQueueing) then
+                    if v.headQueue then
+                        self:pinHeadQueue(v)
+                    else
+                        self:setFrameAnchor(v, prev)
+                    end
+                else
+                    local overlapTime =
+                        (v.size / 2 + prev.size / 2) / lengthPerTime
+                    local overlaps =
+                        maxExp - prev.effectiveExpTime < overlapTime
+                    if overlaps then
+                        self:setFrameAnchor(v, prev)
+                    else
+                        self:pinHeadQueue(v)
+                    end
+                end
             end
         end -- end of if below max time else
     end -- end of for i, v in ipairs(frames) do
+
+    -- toad cleaner code please, could be its own function
+    if bar.para.resolveNameOverlaps and (not bar.vertical) then
+        for i = 2, #frames do
+            local frame = frames[i]
+            local text = frame.nameText
+            local prevFrame = frames[i - 1]
+            local prevText = prevFrame.nameText
+            if (prevText:GetRight() > text:GetLeft()) then
+                text.offset = not prevText.offset
+                local mult = text.offset and 1 or 0
+                local a1, a2 =
+                    unpack(EW.utils.dirToAnchors[frame.para.namePosition])
+                local offset =
+                    (prevText:GetHeight() / 2 + text:GetHeight() / 2) + 2
+                if frame.para.namePosition == "ABOVE" then
+                    frame.nameText:SetPoint(a2, frame, a1, 0, offset * mult)
+                elseif frame.para.namePosition == "BELOW" then
+                    frame.nameText:SetPoint(a2, frame, a1, 0, -offset * mult)
+                end
+            end
+        end
+    end
+    -- local a1, a2 = unpack(EW.utils.dirToAnchors[para.namePosition])
+    -- frame.nameText:SetPoint(a2, frame, a1)
 end
 
 function EW:updateFramePara(frame)

@@ -111,6 +111,9 @@ local defaults = {
         }, -- end of bars
         refreshRate = .05,
         trackedWAs = {},
+        smoothQueueing = true,
+        preserveExtras = false,
+        hideBW = true,
         icons = {
             defaults = {
                 -- defaults for each bar

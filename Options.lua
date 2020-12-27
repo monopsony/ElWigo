@@ -62,6 +62,45 @@ local generalOptions = {
         set = function(tbl, value)
             EW.para.hideBW = value
         end
+    },
+    preserveExtras = {
+        type = "toggle",
+        name = "Preserve extras",
+        order = 3,
+        desc = "If enabled, non-bar BW functions that are tied to the bars (e.g. messages, screen flashing, etc ...) will still work, at the cost of a tiny bit of performance.",
+        disabled = function()
+            return not EW.para.hideBW
+        end,
+        get = function()
+            return EW.para.preserveExtras
+        end,
+        set = function(tbl, value)
+            EW.para.preserveExtras = value
+        end
+    },
+    smoothQueueing = {
+        type = "toggle",
+        name = "Smooth queuing",
+        order = 4,
+        desc = "If enabled, icons smoothly transition from the queue to the bar without overlap.",
+        get = function()
+            return EW.para.smoothQueueing
+        end,
+        set = function(tbl, value)
+            EW.para.smoothQueueing = value
+        end
+    },
+    ignoreDungeons = {
+        type = "toggle",
+        name = "Ignore dungeons",
+        order = 5,
+        desc = "If enabled, disable (most) elWigo functionalities inside of dungeons. Custom boss timers manually added by the user will still work.",
+        get = function()
+            return EW.para.ignoreDungeons
+        end,
+        set = function(tbl, value)
+            EW.para.ignoreDungeons = value
+        end
     }
 }
 
@@ -508,6 +547,20 @@ local barOptions = {
         disabled = function()
             return (not opt:getSelectedBarPara("hasTicks")) or
                 (not opt:getSelectedBarPara("tickText"))
+        end
+    },
+    --EXTRAS
+    extraTicks = {type = "header", name = "Extras", order = 70},
+    resolveNameOverlaps = {
+        type = "toggle",
+        name = "Resolve name overlaps",
+        order = 71,
+        desc = "|cffccffccEXPERIMENTAL|r Tries to resolve timer names overlapping when using horizontal bars.",
+        set = function(tbl, value)
+            opt:setSelectedBarPara("resolveNameOverlaps", value, true)
+        end,
+        get = function()
+            return opt:getSelectedBarPara("resolveNameOverlaps")
         end
     }
 }
