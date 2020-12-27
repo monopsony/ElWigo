@@ -302,6 +302,7 @@ function EW:spawnIcon(spellID, name1, duration, iconID, para)
     frame.iconID = iconID
     frame.maxTime = bar.maxTime
     frame.smoothQueueing = self.para.smoothQueueing
+    frame.anchored = true -- will prevent a flashing of the icon when it appears, as it wont be moved before the anchor update
     self:updateFramePara(frame)
 
     frame.effectiveExpTime = frame.expTime
