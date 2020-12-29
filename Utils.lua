@@ -111,3 +111,48 @@ function ut.isWANameEW(name)
     local match = name:match("^EW(%d)__.*")
     return match and tonumber(match) or nil
 end
+
+function ut.toggleMovable(frame, func)
+    if frame._currentlyMovable then
+        ut.setNotMovable(frame)
+    else
+        ut.setMovable(frame, func)
+    end
+end
+
+function ut.setMovable(frame, func)
+    frame._movableFrame = CreateFrame("Frame", nil, frame)
+    frame._currentlyMovable = true
+    frame:SetMovable(true)
+    local f = frame._movableFrame
+
+    f.texture = f:CreateTexture(nil, "OVERLAY")
+    f.texture:SetAllPoints()
+    f.texture:SetColorTexture(0, 0.8, 0, 0.5)
+
+    f:SetAllPoints()
+    f:SetMovable(true)
+    f:EnableMouse(true)
+    f:RegisterForDrag("LeftButton")
+    f:SetScript(
+        "OnDragStart",
+        function(...)
+            frame:StartMoving()
+        end
+    )
+    f:SetScript(
+        "OnDragStop",
+        function(...)
+            frame:StopMovingOrSizing()
+            local left, bottom = frame:GetLeft(), frame:GetBottom()
+            func(left, bottom)
+        end
+    )
+end
+
+function ut.setNotMovable(frame)
+    frame._currentlyMovable = false
+    frame._movableFrame:Hide()
+    frame._movableFrame = nil
+    frame:SetMovable(false)
+end

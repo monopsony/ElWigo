@@ -238,7 +238,7 @@ local function frameOnUpdate(frame)
             EW:scheduleAnchorUpdate(frame.bar_)
         elseif frame.smoothQueueing then
             local effRemDuration = frame.effectiveExpTime - t
-            if effRemDuration <= frame.maxTime then
+            if not frame.pinned and (effRemDuration <= frame.maxTime) then
                 EW:pinHeadQueue(frame)
             end
         end
@@ -331,8 +331,10 @@ end
 
 function EW:pinHeadQueue(frame)
     local bar = frame.bar_
+    frame.pinned = true
     frame.anchored = true
     frame.anchor = bar
+    frame.effectiveExpTime = frame.expTime
     frame:SetPoint("CENTER", bar, bar.startAnchor)
 end
 
@@ -364,6 +366,7 @@ function EW:setFrameAnchor(frame1, frame2)
         frame1.effectiveExpTime =
             frame2.effectiveExpTime + dist / bar.lengthPerTime
     end
+    frame1.pinned = false
 end
 
 function EW:scheduleAnchorUpdate(bar)
@@ -403,14 +406,18 @@ function EW:updateAnchors(bar)
             end
         else
             -- if first frame in queue
-
+            local pinned = false
             if not aboveMax then
                 v.headQueue = true
                 aboveMax = true
+            else
+                v.headQueue = false
             end
-
+            if v.headQueue then
+            end
             if (i == 1) then
                 self:pinHeadQueue(v)
+                pinned = true
             else
                 local prev = frames[i - 1]
                 if (not self.para.smoothQueueing) then
@@ -428,9 +435,11 @@ function EW:updateAnchors(bar)
                         self:setFrameAnchor(v, prev)
                     else
                         self:pinHeadQueue(v)
+                        pinned = true
                     end
                 end
             end
+            v.pinned = pinned
         end -- end of if below max time else
     end -- end of for i, v in ipairs(frames) do
 
@@ -779,3 +788,84 @@ function EW:selectedIconTest()
         self:spawnIcon("Test", "Test", 15 + (random(20) - 10), 134400, para)
     end
 end
+
+local function launchTestIcon(tbl)
+    -- function EW:spawnIcon(spellID, name1, duration, iconID, para)
+    EW:ScheduleTimer(
+        EW.spawnIcon,
+        tbl["spawnIn"],
+        EW,
+        tbl["spellID"],
+        tbl["name"],
+        tbl["duration"],
+        tbl["icon"]
+    )
+end
+
+function EW:_debugTestBoss(tbl)
+    for k, v in pairs(tbl) do
+        launchTestIcon(v)
+    end
+end
+
+--[[
+    The above is a test function that takes in a table like such:
+local tbl = {
+    {
+        name = "Berserk",
+        duration = 420,
+        spawnIn = 0,
+        spellID = 106951,
+        icon = 236149
+    },
+    {
+        name = "Gluttonous Miasma (1)",
+        duration = 2,
+        spawnIn = 0,
+        spellID = 329298,
+        icon = 1390943
+    },
+    {
+        name = "Gluttonous Miasma (2)",
+        duration = 24,
+        spawnIn = 2,
+        spellID = 329298,
+        icon = 1390943
+    },
+    {
+        name = "Gluttonous Miasma (3)",
+        duration = 24,
+        spawnIn = 26,
+        spellID = 329298,
+        icon = 1390943
+   },
+    {
+        name = "Volatile Ejection (1)",
+        duration = 10,
+        spawnIn = 0,
+        spellID = 334228,
+        icon = 342917
+    },
+    {
+        name = "Volatile Ejection (2)",
+        duration = 35,
+        spawnIn = 10,
+        spellID = 334228,
+        icon = 342917
+    },
+    {
+        name = "Expunge (1)",
+        duration = 32,
+        spawnIn = 0,
+        spellID = 329742,
+        icon = 1778228
+    },
+    {
+        name = "Expunge (2)",
+        duration = 35,
+        spawnIn = 35,
+        spellID = 329742,
+        icon = 1778228
+    }
+}
+]]

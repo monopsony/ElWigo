@@ -167,6 +167,18 @@ local aceOptions = {
 }
 EW.__aceOptions = aceOptions
 
+local function updateSelectedBarPosition(left, bottom)
+    local para = EW.para.bars[opt.selectedBar]
+    if para.vertical then
+        left = left + para.width / 2
+    else
+        bottom = bottom + para.width / 2
+    end
+    para.pos = {left, bottom}
+    EW:updateBar(opt.selectedBar)
+    opt:refreshOptionsGUI()
+end
+
 local barOptions = {
     headerGeneral = {type = "header", name = "General", order = 10},
     shown = {
@@ -186,9 +198,9 @@ local barOptions = {
         name = "X",
         order = 12,
         desc = "X position",
-        min = 0,
+        softMin = 0,
         step = 1,
-        max = ceil(GetScreenWidth()),
+        softMax = ceil(GetScreenWidth()),
         set = function(tbl, value)
             local pos = opt:getSelectedBarPara("pos")
             pos[1] = value
@@ -204,9 +216,9 @@ local barOptions = {
         name = "Y",
         order = 12,
         desc = "Y position",
-        min = 0,
+        softMin = 0,
         step = 1,
-        max = ceil(GetScreenHeight()),
+        softMax = ceil(GetScreenHeight()),
         set = function(tbl, value)
             local pos = opt:getSelectedBarPara("pos")
             pos[2] = value
@@ -267,15 +279,26 @@ local barOptions = {
             return opt:getSelectedBarPara("hideOutOfCombat")
         end
     },
+    enableMover = {
+        type = "execute",
+        name = "Toggle mover",
+        order = 16,
+        func = function(...)
+            EW.utils.toggleMovable(
+                EW.bars[opt.selectedBar],
+                updateSelectedBarPosition
+            )
+        end
+    },
     -- BACKGROUND
     headerBackground = {type = "header", name = "Background", order = 30},
     length = {
         type = "range",
         name = "Length",
         order = 31,
-        min = 0,
+        softMin = 0,
         step = 1,
-        max = ceil(GetScreenWidth()),
+        softMax = ceil(GetScreenWidth()),
         set = function(tbl, value)
             opt:setSelectedBarPara("length", value, true)
         end,
