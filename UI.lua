@@ -338,8 +338,13 @@ function EW:pinHeadQueue(frame)
     frame:SetPoint("CENTER", bar, bar.startAnchor)
 end
 
-function EW:setFrameAnchor(frame1, frame2)
-    if not frame2 then
+function EW:setFrameAnchor(frame1, frame2, outOfSight)
+    if outOfSight then
+        frame1.anchored = true
+        frame1.anchor = UIParent
+        frame1.effectiveExpTime = frame1.expTime
+        frame1:SetPoint("CENTER", UIParent, "CENTER", 0, 20000)
+    elseif not frame2 then
         -- force an update if it was previously anchored
         if frame1.anchored then
             frame1.lastUpdated = 0
@@ -415,7 +420,9 @@ function EW:updateAnchors(bar)
             end
             if v.headQueue then
             end
-            if (i == 1) then
+            if bar.para.invisibleQueue then
+                self:setFrameAnchor(v, nil, true)
+            elseif (i == 1) then
                 self:pinHeadQueue(v)
                 pinned = true
             else
@@ -467,6 +474,9 @@ function EW:updateAnchors(bar)
     end
     -- local a1, a2 = unpack(EW.utils.dirToAnchors[para.namePosition])
     -- frame.nameText:SetPoint(a2, frame, a1)
+    if bar.para.invisibleQueue then
+        self:updateBarVisibility(bar.n)
+    end
 end
 
 function EW:updateFramePara(frame)
@@ -754,8 +764,22 @@ function EW:updateBarVisibility(n)
     if IsEncounterInProgress() or self.optionsOpened then
         bar:Show()
     else
-        if para.hideOutOfCombat and #bar.frames < 1 then
-            bar:Hide()
+        if para.hideOutOfCombat then
+            if not para.invisibleQueue then
+                if #bar.frames < 1 then
+                    bar:Hide()
+                else
+                    bar:Show()
+                end
+            else
+                local frames = bar.frames
+                tsort(frames, compareExpTime)
+                if (not frames[1]) or (frames[1].anchored) then
+                    bar:Hide()
+                else
+                    bar:Show()
+                end
+            end
         else
             bar:Show()
         end

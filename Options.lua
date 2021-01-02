@@ -290,6 +290,18 @@ local barOptions = {
             )
         end
     },
+    invisibleQueue = {
+        type = "toggle",
+        name = "Hide queue",
+        order = 17,
+        desc = "Hide icons that are above the max duration of the bar",
+        set = function(tbl, value)
+            opt:setSelectedBarPara("invisibleQueue", value, true)
+        end,
+        get = function()
+            return opt:getSelectedBarPara("invisibleQueue")
+        end
+    },
     -- BACKGROUND
     headerBackground = {type = "header", name = "Background", order = 30},
     length = {
