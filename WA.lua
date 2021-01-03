@@ -123,6 +123,9 @@ function EW:prepareWA(wa, name)
     wa.size = bar.vertical and wa.height or wa.width or wa.height or 20
     wa.maxTime = bar.maxTime
     wa.expTime = wa.state.expirationTime
+    wa.lastUpdated = 0
+    wa.refreshRate = EW.para.refreshRate
+    wa.smoothQueueing = EW.para.smoothQueueing
 
     wa:ClearAllPoints()
 
@@ -166,24 +169,27 @@ function EW:notifyWAShow(name, shown)
     end
 end
 
+local frameOnUpdate = EW._frameOnUpdate
+
 function EW:moveActiveWAs()
     local atw = self.activeTrackedWAs
     local t = GetTime()
 
     for i = 1, #atw do
-        local f = atw[i]
-        local exp = f.state.expirationTime
-        f.expTime = exp
-        local rem = (exp and exp - t) or 1000
-        f.remDuration = rem
-        if not f.anchored then
-            moveWA(f)
-        end
+        -- local f = atw[i]
+        -- local exp = f.state.expirationTime
+        -- f.expTime = exp
+        -- local rem = (exp and exp - t) or 1000
+        -- f.remDuration = rem
+        -- if not f.anchored then
+        --     moveWA(f)
+        -- end
 
-        if f.headQueue and (f.remDuration < f.maxTime) then
-            f.headQueue = false
-            EW:scheduleAnchorUpdate(f.bar_)
-        end
+        -- if f.headQueue and (f.remDuration < f.maxTime) then
+        --     f.headQueue = false
+        --     EW:scheduleAnchorUpdate(f.bar_)
+        -- end
+        frameOnUpdate(atw[i])
     end
 end
 

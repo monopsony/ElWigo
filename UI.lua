@@ -244,6 +244,7 @@ local function frameOnUpdate(frame)
         end
     end
 end
+EW._frameOnUpdate = frameOnUpdate
 
 local paraMetaTable = {
     __index = function(tbl, key)
