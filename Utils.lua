@@ -21,15 +21,12 @@ function ut.acronym(s)
     if not s then
         return ""
     end
+    --
     local sNew =
-        s:gsub(" of ", ""):gsub(" for ", ""):gsub(" and ", ""):gsub(" the ", ""):gsub(
-        " to ",
-        ""
-    ):gsub("<", ""):gsub(">", ""):gsub("%)", " %)"):gsub("%(", "%( "):gsub(
+        s:gsub("<", ""):gsub(">", ""):gsub("%)", " %)"):gsub("%(", "%( "):gsub(
         "(%w)%S*%s*",
         "%1"
     ):upper()
-
     return sNew
 end
 
