@@ -1,365 +1,303 @@
-ElWigoAddon =
-    LibStub("AceAddon-3.0"):NewAddon("ElWigo", "AceConsole-3.0", "AceTimer-3.0")
+EnhancedTooltipsAddon =
+    LibStub("AceAddon-3.0"):NewAddon("EnhancedTooltips", "AceConsole-3.0")
 
-local EW = ElWigoAddon
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+local ET = EnhancedTooltipsAddon
 local AceGUI = LibStub("AceGUI-3.0")
+local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 local defaults = {
-    profile = {
-        bars = {
-            [1] = {
-                shown = true,
-                pos = {1000, 500},
-                vertical = true,
-                reverse = false,
-                length = 300,
-                width = 13,
-                maxTime = 20,
-                backgroundColor = {0, 0, 0, 0.5},
-                backgroundTexture = "Solid",
-                backgroundBorder = "Blizzard Tooltip",
-                backgroundBorderSize = 8,
-                backgroundBorderColor = {1, 1, 1, 1},
-                hideOutOfCombat = true,
-                hasTicks = true,
-                aboveIcons = true,
-                tickSpacing = 5,
-                tickLength = 20,
-                tickWidth = 1,
-                tickColor = {1, 1, 1, 1},
-                tickText = true,
-                tickTextFontSize = 10,
-                tickTextPosition = "LEFT",
-                tickTextColor = {1, 1, 1, 1}
-            },
-            [2] = {
-                shown = true,
-                pos = {1050, 500},
-                vertical = true,
-                reverse = false,
-                length = 300,
-                width = 13,
-                maxTime = 20,
-                backgroundColor = {0, 0, 0, 0.5},
-                backgroundTexture = "Solid",
-                backgroundBorder = "Blizzard Tooltip",
-                backgroundBorderSize = 8,
-                backgroundBorderColor = {1, 1, 1, 1},
-                hideOutOfCombat = true,
-                hasTicks = true,
-                aboveIcons = true,
-                tickSpacing = 5,
-                tickLength = 20,
-                tickWidth = 1,
-                tickColor = {1, 1, 1, 1},
-                tickText = true,
-                tickTextFontSize = 10,
-                tickTextPosition = "LEFT",
-                tickTextColor = {1, 1, 1, 1}
-            },
-            [3] = {
-                shown = false,
-                pos = {1100, 500},
-                vertical = true,
-                reverse = false,
-                length = 300,
-                width = 13,
-                maxTime = 20,
-                backgroundColor = {0, 0, 0, 0.5},
-                backgroundTexture = "Solid",
-                backgroundBorder = "Blizzard Tooltip",
-                backgroundBorderSize = 8,
-                backgroundBorderColor = {1, 1, 1, 1},
-                hideOutOfCombat = true,
-                hasTicks = true,
-                aboveIcons = true,
-                tickSpacing = 5,
-                tickLength = 20,
-                tickWidth = 1,
-                tickColor = {1, 1, 1, 1},
-                tickText = true,
-                tickTextFontSize = 10,
-                tickTextPosition = "LEFT",
-                tickTextColor = {1, 1, 1, 1}
-            },
-            [4] = {
-                shown = false,
-                pos = {1150, 500},
-                vertical = true,
-                reverse = false,
-                length = 300,
-                width = 13,
-                maxTime = 20,
-                backgroundColor = {0, 0, 0, 0.5},
-                backgroundTexture = "Solid",
-                backgroundBorder = "Blizzard Tooltip",
-                backgroundBorderSize = 8,
-                backgroundBorderColor = {1, 1, 1, 1},
-                hideOutOfCombat = true,
-                hasTicks = true,
-                aboveIcons = true,
-                tickSpacing = 5,
-                tickLength = 20,
-                tickWidth = 1,
-                tickColor = {1, 1, 1, 1},
-                tickText = true,
-                tickTextFontSize = 10,
-                tickTextPosition = "LEFT",
-                tickTextColor = {1, 1, 1, 1}
-            }
-        }, -- end of bars
-        refreshRate = .05,
-        trackedWAs = {},
-        smoothQueueing = true,
-        preserveExtras = false,
-        hideBW = true,
-        icons = {
-            defaults = {
-                -- defaults for each bar
-                [1] = {
-                    width = 35,
-                    height = 35,
-                    border = "None",
-                    borderSize = 8,
-                    background = "None",
-                    color = {1, 1, 1, 1},
-                    borderColor = {1, 1, 1, 1},
-                    duration = true,
-                    durationFontSize = 15,
-                    durationPosition = "CENTER",
-                    durationColor = {1, 1, 1, 1},
-                    durationFont = "Friz Quadrata TT",
-                    name = true,
-                    nameFontSize = 15,
-                    namePosition = "LEFT",
-                    nameColor = {1, 1, 1, 1},
-                    nameAcronym = false,
-                    nameNumber = true,
-                    nameManual = false,
-                    nameManualEntry = "",
-                    nameFont = "Friz Quadrata TT",
-                    automaticIcon = true,
-                    selectedIcon = 134400,
-                    bar = 1,
-                    customType = "Time",
-                    customTimes = {},
-                    customPhaseTimes = {},
-                    usePhaseCount = false
-                },
-                [2] = {
-                    width = 25,
-                    height = 25,
-                    border = "None",
-                    borderSize = 8,
-                    background = "None",
-                    color = {1, 1, 1, 1},
-                    borderColor = {1, 1, 1, 1},
-                    duration = true,
-                    durationFontSize = 15,
-                    durationPosition = "CENTER",
-                    durationColor = {1, 1, 1, 1},
-                    durationFont = "Friz Quadrata TT",
-                    name = true,
-                    nameFontSize = 15,
-                    namePosition = "LEFT",
-                    nameColor = {1, 1, 1, 1},
-                    nameAcronym = false,
-                    nameNumber = true,
-                    nameManual = false,
-                    nameManualEntry = "",
-                    nameFont = "Friz Quadrata TT",
-                    automaticIcon = true,
-                    selectedIcon = 134400,
-                    bar = 2,
-                    customType = "Time",
-                    customTimes = {},
-                    customPhaseTimes = {},
-                    usePhaseCount = false
-                },
-                [3] = {
-                    width = 35,
-                    height = 35,
-                    border = "None",
-                    borderSize = 8,
-                    background = "None",
-                    color = {1, 1, 1, 1},
-                    borderColor = {1, 1, 1, 1},
-                    duration = true,
-                    durationFontSize = 15,
-                    durationPosition = "CENTER",
-                    durationColor = {1, 1, 1, 1},
-                    durationFont = "Friz Quadrata TT",
-                    name = true,
-                    nameFontSize = 15,
-                    namePosition = "LEFT",
-                    nameColor = {1, 1, 1, 1},
-                    nameAcronym = false,
-                    nameNumber = true,
-                    nameManual = false,
-                    nameManualEntry = "",
-                    nameFont = "Friz Quadrata TT",
-                    automaticIcon = true,
-                    selectedIcon = 134400,
-                    bar = 3,
-                    customType = "Time",
-                    customTimes = {},
-                    customPhaseTimes = {},
-                    usePhaseCount = false
-                },
-                [4] = {
-                    width = 35,
-                    height = 35,
-                    border = "None",
-                    borderSize = 8,
-                    background = "None",
-                    color = {1, 1, 1, 1},
-                    borderColor = {1, 1, 1, 1},
-                    duration = true,
-                    durationFontSize = 15,
-                    durationPosition = "CENTER",
-                    durationColor = {1, 1, 1, 1},
-                    durationFont = "Friz Quadrata TT",
-                    name = true,
-                    nameFontSize = 15,
-                    namePosition = "LEFT",
-                    nameColor = {1, 1, 1, 1},
-                    nameAcronym = false,
-                    nameNumber = true,
-                    nameManual = false,
-                    nameManualEntry = "",
-                    nameFont = "Friz Quadrata TT",
-                    automaticIcon = true,
-                    selectedIcon = 134400,
-                    bar = 4,
-                    customType = "Time",
-                    customTimes = {},
-                    customPhaseTimes = {},
-                    usePhaseCount = false
-                }
-            } -- end of icons/defaults
-        }, -- end of icons
-        bosses = {}
-    } -- end of profile
+    profile = {modifierOnly = false, modifier = "shift"} -- end of profile
 }
 
-function EW:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("ElWigoDB", defaults, true)
+function ET:OnInitialize()
+    self.db = LibStub("AceDB-3.0"):New("EnhancedTooltipsDB", defaults, true)
     self.para = self.db.profile
 
     local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    self.__aceOptions.args.profiles = profiles
 
     self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
     self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
     self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
 
-    AceConfigDialog:SetDefaultSize("ElWigo", 1200, 700)
-
-    -- fill in info
-    self.encounterID = nil
-    self.bigWigs:registerAllMessages()
-
-    -- load BW raids
-    self.options:updateBWRaidList()
-
-    -- UI
-    self:updateBars()
+    -- AceConfigDialog:SetDefaultSize("EnhancedTooltips", 1200, 700)
 end
 
-function EW:OnEnable()
+function ET:OnEnable()
     --
 end
 
-function EW:OnDisable()
+function ET:OnDisable()
     --
 end
 
-function EW:RefreshConfig()
+function ET:RefreshConfig()
     -- ReloadUI()
     self.para = self.db.profile
-    self:updateBars()
+
     -- self.options:updateRaidListAll()
 end
 
--- toad remove
-EW.engageID = 2329 -- Nyalotha Wrathion, BY DEFAULT FOR TESTING PURPOSES
-EW.optionsOpened = false
-function EW:chatCommandHandler(msg)
-    SlashCmdList.BigWigs()
-    AceConfigDialog:Close("BigWigs")
-    if BigWigsOptions:IsOpen() then
-        BigWigsOptions:Open()
-    end
-
-    -- EW.options:updateRaidListAll()
-    if not self.optionsOpened then
-        local frame = AceGUI:Create("Frame")
-        self.currentOptionsFrame = frame
-
-        frame:Show()
-        frame:SetTitle("ElWigo")
-        frame:SetCallback(
-            "OnClose",
-            function(widget)
-                AceGUI:Release(widget)
-                EW:optionsOnClose()
-            end
-        )
-
-        AceConfigDialog:Open("ElWigo", frame)
-
-        self:optionsOnOpen()
-    else
-        self.currentOptionsFrame:Hide()
-        self.currentOptionsFrame = nil
-    end
-
-    self.options:selectCurrentRaidBoss()
+function ET:chatCommandHandler(msg)
+    AceConfigDialog:Open("EnhancedTooltips")
 end
-EW:RegisterChatCommand("ew", "chatCommandHandler")
-EW:RegisterChatCommand("elwigo", "chatCommandHandler")
+ET:RegisterChatCommand("enhancedtooltips", "chatCommandHandler")
 
-function EW:optionsOnOpen()
-    self.optionsOpened = true
-    self:updateBarsVisibility()
-end
-
-function EW:optionsOnClose()
-    self.optionsOpened = false
-    self:updateBarsVisibility()
-end
-
-EW.eventFrame = CreateFrame("Frame", "ElWigoEventFrame", UIParent)
-EW.eventFrame:RegisterEvent("ENCOUNTER_START")
-EW.eventFrame:RegisterEvent("ENCOUNTER_END")
-EW.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-EW.eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-EW.eventFrame:SetScript(
+ET.eventFrame = CreateFrame("Frame", "EnhancedTooltipsEventFrame", UIParent)
+ET.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+ET.eventFrame:SetScript(
     "OnEvent",
     function(self, event, ...)
-        if event == "ENCOUNTER_START" then
-            local id = ...
-            EW.engageID = id
-            EW.phaseCount = 0 -- EW:phaseTransition() increments it to 1
-            EW:startCustomTimers()
-            EW:phaseTransition(1)
-        elseif event == "ENCOUNTER_END" then
-            EW:removeAllFrames()
-            local EW = EW
-            C_Timer.After(
-                3,
-                function()
-                    EW:updateBarsVisibility()
-                end
-            ) -- arbitrary
-        elseif event == "PLAYER_REGEN_ENABLED" then
-            local EW = EW
-            EW:updateBarsVisibility()
-        elseif event == "PLAYER_ENTERING_WORLD" then
-            -- WA
-            EW:hookWANameUpdate()
-            EW:updateTrackedWAs()
-        end
+        ET:initialiseHooks()
     end
 )
+
+function ET:stringDuration(s, cap)
+    local n = s:match("%d+%.?%d*")
+    if not n then
+        return "?"
+    end
+    s = s:lower()
+
+    n = tonumber(n)
+
+    if s:match("sec") or s:match("second") or s:match("seconds") then
+        if n <= 10 then
+            return cap and "Very Short" or "very short"
+        else
+            return cap and "Short" or "short"
+        end
+    elseif s:match("min") or s:match("minutes") then
+        if n <= 4 then
+            return cap and "Medium" or "medium"
+        elseif n <= 10 then
+            return cap and "Longish" or "longish"
+        else
+            return cap and "Long" or "long"
+        end
+    else
+        return cap and "Very Long" or "very long"
+    end
+end
+
+local magicSchools = {
+    "Physical",
+    "Arcane",
+    "Fire",
+    "Frost",
+    "Nature",
+    "Shadow",
+    "Holy",
+    "Astral",
+    "Chaos",
+    "Elemental",
+    "Firestorm",
+    "Flamestrike",
+    "Plague",
+    "Radiant",
+    "Shadowflame",
+    "Shadowstrike",
+    "Spellfrost",
+    "Spellstrike",
+    "Twilight",
+    "Frostfire",
+    "Shadowfrost"
+}
+
+function ET:purifyText(s)
+    if not s then
+        return ""
+    end
+
+    -- if true then
+    --     return s
+    -- end
+
+    -- get rid of those pesky numbers on stats
+    s = s:gsub("%+%d*(.*)", "+%1")
+
+    -- see if it contains an unnecessary CD indication
+    local cd = s:match("(%d+%.?%d* %D*) [cC]ooldown")
+    if cd then
+        local dur = ET:stringDuration(cd, s:match("Cooldown"))
+        s = s:gsub("%d+%.?%d* %D* ([cC]ooldown)", dur .. " %1")
+    end
+
+    local cd = s:match("(%d+%.?%d* %D*) [rR]echarge")
+    if cd then
+        local dur = ET:stringDuration(cd, s:match("Recharge"))
+        s = s:gsub("%d+%.?%d* %D* ([rR]echarge)", dur .. " %1")
+    end
+
+    -- number of enemies is irrelevant
+    s = s:gsub("up to %d+ (%S-%s?)allies", "some %1allies")
+    s = s:gsub("up to %d+ (%S-%s?)enemies", "some %1enemies")
+    s = s:gsub("up to %d+ (%S-%s?)targets", "some %1targets")
+    s = s:gsub("%d+ (%S-%s?)allies", "some %1allies")
+    s = s:gsub("%d+ (%S-%s?)enemies", "some %1enemies")
+    s = s:gsub("%d+ (%S-%s?)targets", "some %1targets")
+
+    -- for +duration is just unnecessary
+    s = s:gsub("([fF]or) %d+ sec", "%1 a bit")
+    s = s:gsub("([fF]or) %d+ min", "%1 a while")
+    s = s:gsub("([fF]or) %d+ hours?", "%1 a long time")
+    s = s:gsub("([fF]or) that amount%s?", "") -- cleaning up
+
+    -- get rid of cast stuff
+    s = s:gsub("%d+%.?%d- sec ([cC])ast", "Cast")
+    s = s:gsub("%d+%.?%d* min ([cC])ast", "Cast")
+
+    --mana/health & other dumb resources
+    s = s:gsub("%d+,?%d* Mana(%s?)", "Some Mana%1")
+    s = s:gsub("%d+,?%d* mana(%s?)", "some mana%1")
+    s = s:gsub("%d+,?%d* Health(%s?)", "Some Health%1")
+    s = s:gsub("%d+,?%d* health(%s?)", "some health%1")
+    s = s:gsub("%d+ to %d+ Combo Points%s?", "Some Combo Points")
+    s = s:gsub("%d+ Combo Points%s?", "Some Combo Points")
+    s = s:gsub("%d+ Energy%s?", "Some Energy")
+    s = s:gsub("%d+ Rage%s?", "Some Rage")
+    s = s:gsub("%d+ Focus%s?", "Some Focus")
+    s = s:gsub("%d+ Runic Power%s?", "Some Runic Power")
+    s = s:gsub("%d+ Chi%s?", "Some Chi")
+    s = s:gsub("%d+ Insanity%s?", "Some Insanity")
+    s = s:gsub("%d+ Astral Power%s?", "Some Astral Power")
+    s = s:gsub("%d+ Soul Shards?%s?", "Some Soul Shards")
+    s = s:gsub("%d+ Maelstrom%s?", "Some Maelstrom")
+
+    -- stats
+    s = s:gsub("%d+ primary stat", "primary stats")
+    s = s:gsub("%d+ Agility", "Agility")
+    s = s:gsub("%d+ Intellect", "Intellect")
+    s = s:gsub("%d+ Strength", "Strength")
+    s = s:gsub("%d+ Critical Strike", "Critical Strike")
+    s = s:gsub("%d+ Versatility", "Versatility")
+    s = s:gsub("%d+ Haste", "Haste")
+
+    -- get rid of nerdy damage schools
+    if s:match("damage") then
+        for _, school in ipairs(magicSchools) do
+            s = s:gsub(school .. " damage", "damage")
+        end
+    end
+
+    -- need to get rid of % of damage/healing things first or itll not work well
+    s = s:gsub("%d%% of the damage", "a fraction of the damage")
+    s = s:gsub("%d%% of the healing", "a fraction of the healing")
+
+    -- damage/healing numbers are just unnecessary
+    s = s:gsub("([Dd]amages? .-)for %d+,?%d*,?%d*%s?", "%1")
+    s = s:gsub("([Hh]eals? .-)for %d+,?%d*,?%d*%s?", "%1")
+    s = s:gsub("([Dd]amaging .-)for %d+,?%d*,?%d*%s?", "%1")
+    s = s:gsub("([Hh]ealing .-)for %d+,?%d*,?%d*%s?", "%1")
+    s = s:gsub("(until%D*)%d+,?%d*,?%d* total damage", "%1enough damage")
+    s = s:gsub("(until%D*)%d+,?%d*,?%d* total healing", "%1enough healing")
+    s = s:gsub("%d+,?%d*,?%d* damage", "damage")
+    s = s:gsub("%d+,?%d*,?%d* heal", "heal")
+
+    -- stupid durations
+    s = s:gsub("([eE]very) %d+.?%d* sec", "%1 now and then")
+    s = s:gsub("over %d+.?%d* sec", "over time")
+    s = s:gsub("next %d.*%d* sec", "a while")
+    s = s:gsub("([Ll]asts?) %d+ sec", "%1 a while")
+    s = s:gsub("for %d.*%d* sec", "for a while")
+    s = s:gsub("for up to %d.*%d* sec", "for a while")
+    s = s:gsub("by %d.*%d* sec", "by a bit")
+
+    -- range
+    s = s:gsub("within %d+ yds?", "in range")
+    range = s:match("(%d+) yd")
+    if range then
+        s = s:gsub("%d+ yd", (tonumber(range) >= 30 and "long" or "short"))
+    end
+
+    s = s:gsub("within %d+ yards?", "in range")
+    range = s:match("(%d+) yards?")
+    if range then
+        s = s:gsub("%d+ yards?", (tonumber(range) >= 30 and "long" or "short"))
+    end
+
+    -- by followed by a number is never a good sign
+    s = s:gsub("by %d+%%?%s?", "")
+
+    -- random things nobody needs to see
+    s = s:gsub("instantly%s?", "")
+    s = s:gsub("%d.?%d*%% of your maximum mana", "some mana")
+    s = s:gsub("%d.?%d*%% of your maximum health", "some health")
+    s = s:gsub("%d.?%d*%% of", "a portion of")
+    s = s:gsub("an additional %d+%%", "an additional amount")
+    s = s:gsub("up to %d+%%", "some")
+    s = s:gsub("%d+%%", "some")
+    s = s:gsub("Max %d+ Charges", "Has Charges")
+
+    return s
+end
+
+function ET.tooltipUpdate(gt)
+    local ET = ET
+
+    if ET.para.modifierOnly then
+        if
+            (ET.para.modifier == "ctrl" and not IsControlKeyDown()) or
+                (ET.para.modifier == "shift" and not IsShiftKeyDown()) or
+                (ET.para.modifier == "alt" and not IsAltKeyDown())
+         then
+            return
+        end
+    end
+
+    local n = select("#", gt:GetRegions())
+    local s = ""
+    for i = 1, n do
+        local reg = select(i, gt:GetRegions())
+        if reg.GetText then
+            local s = ET:purifyText(reg:GetText())
+            if s then
+                reg:SetText(s)
+            end
+        end
+    end
+end
+
+function ET:initialiseHooks()
+    local gt = GameTooltip
+    if gt.EnhancedTooltipsHooked then
+        return
+    end
+
+    gt:HookScript("OnTooltipSetSpell", self.tooltipUpdate)
+    gt:HookScript("OnTooltipSetItem", self.tooltipUpdate)
+end
+
+local options = {
+    type = "group",
+    args = {
+        modifierOnly = {
+            type = "toggle",
+            name = "Only with modifier",
+            order = 2,
+            get = function()
+                return ET.para.modifierOnly
+            end,
+            set = function(tbl, value)
+                ET.para.modifierOnly = value
+            end
+        },
+        modifier = {
+            type = "select",
+            name = "Modifier",
+            order = 3,
+            values = {alt = "alt", ctrl = "ctrl", shift = "shift"},
+            disabled = function()
+                return not ET.para.modifierOnly
+            end,
+            get = function()
+                return ET.para.modifier
+            end,
+            set = function(tbl, value)
+                ET.para.modifier = value
+            end
+        }
+    }
+}
+
+AceConfig:RegisterOptionsTable("EnhancedTooltips", options)

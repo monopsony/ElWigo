@@ -1,0 +1,10 @@
+## Interface: 90001
+## Title: EnhancedTooltips
+## Notes: Mierihn is sad
+## Version: v1.1.6
+## DefaultState: disabled
+## SavedVariables: EnhancedTooltipsDB
+
+libs.xml
+
+Core.lua
