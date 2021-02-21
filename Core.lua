@@ -286,11 +286,16 @@ end
 EW.engageID = 2329 -- Nyalotha Wrathion, BY DEFAULT FOR TESTING PURPOSES
 EW.optionsOpened = false
 function EW:chatCommandHandler(msg)
-    SlashCmdList.BigWigs()
-    AceConfigDialog:Close("BigWigs")
-    if BigWigsOptions:IsOpen() then
-        BigWigsOptions:Open()
+    if not BigWigsOptions then
+        SlashCmdList.BigWigs()
+        BigWigsOptions:Close()
     end
+    -- AceConfigDialog:Close("BigWigs")
+    -- print("BigWigsOptions", BigWigsOptions, BigWigsOptions:IsOpen())
+    -- if BigWigsOptions:IsOpen() then
+    --     print("opened Bigwigs")
+    --     BigWigsOptions:Open()
+    -- end
 
     -- EW.options:updateRaidListAll()
     if not self.optionsOpened then
@@ -341,9 +346,8 @@ EW.eventFrame:SetScript(
         if event == "ENCOUNTER_START" then
             local id = ...
             EW.engageID = id
-            EW.phaseCount = 0 -- EW:phaseTransition() increments it to 1
+            EW.phaseCount = 0
             EW:startCustomTimers()
-            EW:phaseTransition(1)
         elseif event == "ENCOUNTER_END" then
             EW:removeAllFrames()
             local EW = EW

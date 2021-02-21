@@ -14,6 +14,7 @@ function BW:registerAllMessages()
     register(self, "BigWigs_StopBars", self.stopBars)
     register(self, "BigWigs_OnBossDisable", self.onBossDisable)
     register(self, "BigWigs_Message", self.message)
+    register(self, "BigWigs_SetStage", self.stage)
     -- register(self, "BigWigs_OnBossEngage",   self.bossEngaged)
 
     register(self, "BigWigs_BarCreated", self.barCreated)
@@ -57,7 +58,7 @@ function BW:stopBars(...)
 end
 
 function BW:onBossDisable(...)
-    EW.engageID = nil
+    -- not doing anything with that yet
 end
 
 function BW:barCreated(table1, bar, _, name1, name2, duration, icon)
@@ -77,6 +78,10 @@ function BW:barCreated(table1, bar, _, name1, name2, duration, icon)
     end
 end
 
+function BW:stage(tbl, stage, ...)
+    EW:phaseTransition(stage)
+end
+
 function BW:message(key, text, color, icon)
     if EW.para.ignoreDungeons then
         local inInstance, instanceType = IsInInstance()
@@ -84,9 +89,7 @@ function BW:message(key, text, color, icon)
             return
         end
     end
-    if key == "stages" then
-        EW:phaseTransition(text)
-    end
+    -- not yet doing anything with that
 end
 
 -- function BW:bossEngaged(bossTbl, difficulty)

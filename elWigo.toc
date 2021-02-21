@@ -1,8 +1,8 @@
 ## Interface: 90001
 ## Title: elWigo
-## Notes: Mierihn is gay
+## Notes: Miehrin
 ## Author: Gay
-## Version: v1.1.6
+## Version: v1.2.6
 ## DefaultState: disabled
 ## SavedVariables: ElWigoDB
 ## Dependencies: BigWigs

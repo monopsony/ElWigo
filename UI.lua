@@ -147,11 +147,9 @@ function EW:updateBar(n)
             t.text:SetPoint(a2, t, a1)
             t.text:SetTextColor(unpack(para.tickTextColor))
 
-            t.text:SetFont(
-                "Fonts\\FRIZQT__.TTF",
-                para.tickTextFontSize,
-                "OUTLINE"
-            )
+            local font =
+                LSM:Fetch("font", para.tickFont) or "Fonts\\FRIZQT__.TTF"
+            t.text:SetFont(font, para.tickTextFontSize, "OUTLINE")
             t.text:SetText(i * para.tickSpacing)
         end
     end
@@ -681,11 +679,9 @@ function EW:startCustomPhaseTimers()
         return
     end
     local phase = self.phase
-
     for _, extraKey in ipairs(para.__extras or {}) do
         local p = self:getIconPara(extraKey)
         local phase = (p.usePhaseCount and self.phaseCount) or self.phase
-
         if p and p.customPhaseTimes[phase] then
             -- toad icon handling
             local icon

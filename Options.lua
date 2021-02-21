@@ -533,6 +533,20 @@ local barOptions = {
             return not opt:getSelectedBarPara("hasTicks")
         end
     },
+    tickFont = {
+        name = "Font",
+        type = "select",
+        style = "dropdown",
+        dialogControl = "LSM30_Font",
+        order = 57,
+        values = LSM:HashTable("font"),
+        set = function(tbl, value)
+            opt:setSelectedBarPara("tickFont", value, true)
+        end,
+        get = function()
+            return opt:getSelectedBarPara("tickFont")
+        end
+    },
     tickTextFontSize = {
         order = 57,
         type = "range",
@@ -1581,7 +1595,7 @@ function opt:updateBWRaidList()
         if
             zoneTbl[k] == "BigWigs_Shadowlands" or
                 zoneTbl[k] == "LittleWigs_Shadowlands"
-         then
+         then -- toad REMOVE
             local zone
             if k < 0 then
                 local tbl = GetMapInfo(-k)
