@@ -282,14 +282,59 @@ function EW:RefreshConfig()
     -- self.options:updateRaidListAll()
 end
 
--- toad remove
+-- TODO we probably can forego this boolean
+local EW_LOADED = false
+-- Stolen from BigWigs/Loader.lua
+local function IsAddOnEnabled(addon)
+	local character = UnitName("player")
+	return GetAddOnEnableState(character, addon) > 0
+end
+
+local BIGWIGS_METADATA_TAGS = {
+  "X-BigWigs-LoadOn-CoreEnabled",
+  "X-BigWigs-LoadOn-InstanceId",
+  "X-BigWigs-ExtraMenu",
+  "X-BigWigs-NoMenu",
+  "X-BigWigs-LoadOn-WorldBoss",
+  "X-BigWigs-LoadOn-Slash",
+}
+local function IsBigWigsAddon(name)
+    for i = 1, #BIGWIGS_METADATA_TAGS do
+        if GetAddOnMetadata(name, BIGWIGS_METADATA_TAGS[i]) then
+            return true
+        end
+    end
+    return false
+end
+
+local function LoadBigWigsAddon(name)
+    EnableAddOn(name)
+    local loaded, reason = LoadAddOn(name)
+    if not loaded then print('elWigo: Couldn\'t load BigWigs module ' .. name .. ' [' .. reason .. ']') end
+end
+
+local function LoadBigWigs()
+  if EW_LOADED then return end
+  EW_LOADED = true
+
+  for _, name in pairs({'BigWigs_Core', 'BigWigs_Options', 'BigWigs_Plugins'}) do
+    LoadBigWigsAddon(name)
+  end
+  for i = 1, GetNumAddOns() do
+      local name = GetAddOnInfo(i)
+      if IsAddOnEnabled(name) and IsBigWigsAddon(name) then
+          LoadBigWigsAddon(name)
+      end
+  end
+  BigWigs:Enable()
+  EW.options:updateBWRaidList()
+end
+
+-- todo remove
 EW.engageID = 2329 -- Nyalotha Wrathion, BY DEFAULT FOR TESTING PURPOSES
 EW.optionsOpened = false
 function EW:chatCommandHandler(msg)
-    if not BigWigsOptions then
-        SlashCmdList.BigWigs()
-        BigWigsOptions:Close()
-    end
+    LoadBigWigs()
     -- AceConfigDialog:Close("BigWigs")
     -- print("BigWigsOptions", BigWigsOptions, BigWigsOptions:IsOpen())
     -- if BigWigsOptions:IsOpen() then

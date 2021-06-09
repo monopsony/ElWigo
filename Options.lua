@@ -1591,29 +1591,24 @@ function opt:updateBWRaidList()
     local zoneTbl = loader.zoneTbl
     local tree = aceOptions.args.bosses.args
 
-    for k in next, loader:GetZoneMenus() do
-        if
-            zoneTbl[k] == "BigWigs_Shadowlands" or
-                zoneTbl[k] == "LittleWigs_Shadowlands"
-         then -- toad REMOVE
-            local zone
-            if k < 0 then
-                local tbl = GetMapInfo(-k)
-                if tbl then
-                    zone = tbl.name
-                else
-                    zone = tostring(k)
-                end
+    for k in pairs(loader:GetZoneMenus()) do
+        local zone
+        if k < 0 then
+            local tbl = GetMapInfo(-k)
+            if tbl then
+                zone = tbl.name
             else
-                zone = GetRealZoneText(k)
+                zone = tostring(k)
             end
-            if zone then
-                if zoneToId[zone] then
-                    zone = zone .. "1" -- When instances exist more than once (Karazhan)
-                end
-                zoneToId[zone] = k
-                alphabeticalZoneList[#alphabeticalZoneList + 1] = zone
+        else
+            zone = GetRealZoneText(k)
+        end
+        if zone then
+            if zoneToId[zone] then
+                zone = zone .. "1" -- When instances exist more than once (Karazhan)
             end
+            zoneToId[zone] = k
+            alphabeticalZoneList[#alphabeticalZoneList + 1] = zone
         end
     end
 
