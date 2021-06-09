@@ -1575,7 +1575,7 @@ end
 -- doing it manually because seemingly theres no way to get instance info of
 -- a given ID? Or Im just daft, idk
 local isRaidIDTable = {
-    [2296] = true -- Nathria
+    [2296] = true -- Nathria,
 }
 
 function opt:updateBWRaidList()
@@ -1594,7 +1594,9 @@ function opt:updateBWRaidList()
     for k in next, loader:GetZoneMenus() do
         if
             zoneTbl[k] == "BigWigs_Shadowlands" or
-                zoneTbl[k] == "LittleWigs_Shadowlands"
+                zoneTbl[k] == "LittleWigs_Shadowlands" or
+                zoneTbl[k] == "BigWigs_BurningCrusade" or
+                zoneTbl[k] == "LittleWigs_BurningCrusade"
          then -- toad REMOVE
             local zone
             if k < 0 then
@@ -1673,6 +1675,11 @@ function opt:updateRaidList(raidID, refreshInfo, refreshAce)
     local tree = aceOptions.args.bosses.args
     local bosses = tree[idString]
     local idString = tostring(raidID)
+    local nameToId = EW.para.instanceSpellNameToID
+
+    if not raids[raidID] then
+        return
+    end
 
     if not raids[raidID].bosses then
         refreshInfo = true
@@ -1732,8 +1739,9 @@ function opt:updateRaidList(raidID, refreshInfo, refreshAce)
                             ),
                             bossID = module.engageId
                         }
-
                         tinsert(bossOptions, oTbl)
+                        nameToId[name] = o
+
                         self.options[concatOptionName(module.moduleName, name)] =
                             oTbl
                     end

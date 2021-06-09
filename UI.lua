@@ -254,21 +254,36 @@ local paraMetaTable = {
     end
 }
 
-function EW:getIconPara(spellID, engageID)
+function EW:getIconPara(spellID, engageID, name)
     local bossID = engageID or self.engageID or 0
     local barID = 1
     local userPara = {}
     if self.para.bosses[bossID] and self.para.bosses[bossID][spellID] then
         barID = self.para.bosses[bossID][spellID]["bar"] or 1
         userPara = self.para.bosses[bossID][spellID]
+    else
+        local id = self:getParaIDByName(name)
+        if id and self.para.bosses[bossID] and self.para.bosses[bossID][id] then
+            barID = self.para.bosses[bossID][id]["bar"] or 1
+            userPara = self.para.bosses[bossID][id]
+        end
     end
 
     local para = {
         __default = self.para.icons.defaults[barID],
         __user = userPara
     }
+
     setmetatable(para, paraMetaTable)
     return para
+end
+
+function EW:getParaIDByName(name)
+    if not self.para.instanceSpellNameToID then
+        return nil
+    end
+    local id = self.para.instanceSpellNameToID[name] or nil
+    return id
 end
 
 local strip = EW.utils.stringStrip
@@ -276,8 +291,7 @@ local sacro = EW.utils.acronym
 local srbn = EW.utils.removeBracketsNumber
 function EW:spawnIcon(spellID, name1, duration, iconID, para)
     local name, num = strip(name1)
-    local para = para or EW:getIconPara(spellID)
-
+    local para = para or EW:getIconPara(spellID, nil, name)
     -- self:removeBarFrameByID(para.bar, spellID)
     self:removeBarFrameByName(para.bar, name)
 

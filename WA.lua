@@ -13,6 +13,9 @@ EW.activeTrackedWAs = {}
 EW.trackedWAs = {}
 
 function EW:hookWANameUpdate()
+    if not WeakAuras then
+        return
+    end
     local func = WeakAuras.Rename
     WeakAuras.Rename = function(...)
         func(...)

@@ -239,13 +239,19 @@ local defaults = {
                 }
             } -- end of icons/defaults
         }, -- end of icons
-        bosses = {}
+        bosses = {},
+        instanceSpellNameToID = {}
     } -- end of profile
 }
 
 function EW:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("ElWigoDB", defaults, true)
     self.para = self.db.profile
+
+    -- version fix
+    if not self.para.instanceSpellNameToID then
+        self.para.instanceSpellNameToID = {}
+    end
 
     local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
     self.__aceOptions.args.profiles = profiles
@@ -290,12 +296,6 @@ function EW:chatCommandHandler(msg)
         SlashCmdList.BigWigs()
         BigWigsOptions:Close()
     end
-    -- AceConfigDialog:Close("BigWigs")
-    -- print("BigWigsOptions", BigWigsOptions, BigWigsOptions:IsOpen())
-    -- if BigWigsOptions:IsOpen() then
-    --     print("opened Bigwigs")
-    --     BigWigsOptions:Open()
-    -- end
 
     -- EW.options:updateRaidListAll()
     if not self.optionsOpened then
@@ -335,6 +335,15 @@ function EW:optionsOnClose()
     self:updateBarsVisibility()
 end
 
+function EW:updateActiveInstance()
+    local name, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+    if not name then
+        self.activeInstance = nil
+        return
+    end
+    self.activeInstance = instanceID
+end
+
 EW.eventFrame = CreateFrame("Frame", "ElWigoEventFrame", UIParent)
 EW.eventFrame:RegisterEvent("ENCOUNTER_START")
 EW.eventFrame:RegisterEvent("ENCOUNTER_END")
@@ -364,6 +373,7 @@ EW.eventFrame:SetScript(
             -- WA
             EW:hookWANameUpdate()
             EW:updateTrackedWAs()
+            EW:updateActiveInstance()
         end
     end
 )

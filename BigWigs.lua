@@ -23,9 +23,6 @@ function BW:registerAllMessages()
     -- it doesnt onUpdate and thus doesnt trigger the emphasize
 end
 
-function BW:dummyFunction(...)
-end
-
 function BW:startBar(_, spellID, name, duration, icon)
     if EW.para.ignoreDungeons then
         local inInstance, instanceType = IsInInstance()
