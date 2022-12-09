@@ -1593,8 +1593,8 @@ function opt:updateBWRaidList()
 
     for k in next, loader:GetZoneMenus() do
         if
-            zoneTbl[k] == "BigWigs_Shadowlands" or
-                zoneTbl[k] == "LittleWigs_Shadowlands" or
+            zoneTbl[k] == "BigWigs_Dragonflight" or
+                zoneTbl[k] == "LittleWigs_Dragonflight" or
                 zoneTbl[k] == "BigWigs_BurningCrusade" or
                 zoneTbl[k] == "LittleWigs_BurningCrusade"
          then -- toad REMOVE

@@ -72,7 +72,8 @@ local function untrackWA(f)
 end
 
 local function getWARegion(name)
-    return WeakAuras.regions[name] and WeakAuras.regions[name].region
+    -- return WeakAuras.regions[name] and WeakAuras.regions[name].region
+    return WeakAuras.GetRegion(name)
 end
 
 local function getWAPara(name)
