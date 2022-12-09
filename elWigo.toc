@@ -2,7 +2,7 @@
 ## Title: elWigo
 ## Notes: nil
 ## Author: Mono
-## Version: v1.3.0
+## Version: v1.3.1
 ## DefaultState: disabled
 ## SavedVariables: ElWigoDB
 ## Dependencies: BigWigs
