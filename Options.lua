@@ -1578,6 +1578,26 @@ local isRaidIDTable = {
     [2296] = true -- Nathria,
 }
 
+local currentContentList = {"BigWigs_Dragonflight", "LittleWigs_Dragonflight"}
+local mplusContentList = {
+    "LittleWigs_MistsOfPandaria", 
+    "LittleWigs_WarlordsOfDraenor",
+    "LittleWigs_Legion"
+}
+local oldDungeonsList = {
+    "Temple of the Jade Serpent",
+    "Shadowmoon Burial Grounds",
+    "Halls of Valor",
+    "Court of Stars"
+}
+
+local function isInList(name, lst)
+    for i,v in ipairs(lst) do 
+        if name == v then return true end
+    end
+    return false
+end
+
 function opt:updateBWRaidList()
     local para = EW.para.bosses
 
@@ -1592,12 +1612,10 @@ function opt:updateBWRaidList()
     local tree = aceOptions.args.bosses.args
 
     for k in next, loader:GetZoneMenus() do
-        if
-            zoneTbl[k] == "BigWigs_Dragonflight" or
-                zoneTbl[k] == "LittleWigs_Dragonflight" or
-                zoneTbl[k] == "BigWigs_BurningCrusade" or
-                zoneTbl[k] == "LittleWigs_BurningCrusade"
-         then -- toad REMOVE
+        local currentContent = isInList(zoneTbl[k], currentContentList)
+        local mplusContent = isInList(zoneTbl[k], mplusContentList)
+
+        if currentContent or mplusContent then -- toad REMOVE
             local zone
             if k < 0 then
                 local tbl = GetMapInfo(-k)
@@ -1608,6 +1626,9 @@ function opt:updateBWRaidList()
                 end
             else
                 zone = GetRealZoneText(k)
+            end
+            if zone and mplusContent then
+                zone = (isInList(zone, oldDungeonsList) and zone)
             end
             if zone then
                 if zoneToId[zone] then
