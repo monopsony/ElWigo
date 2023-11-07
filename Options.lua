@@ -1582,13 +1582,17 @@ local currentContentList = {"BigWigs_Dragonflight", "LittleWigs_Dragonflight"}
 local mplusContentList = {
     "LittleWigs_MistsOfPandaria", 
     "LittleWigs_WarlordsOfDraenor",
-    "LittleWigs_Legion"
+    "LittleWigs_BattleForAzeroth",
+    "LittleWigs_Legion",
+    "LittleWigs_Cataclysm"
 }
 local oldDungeonsList = {
-    "Temple of the Jade Serpent",
-    "Shadowmoon Burial Grounds",
-    "Halls of Valor",
-    "Court of Stars"
+    "Darkheart Thicket",
+    "Black Rook Hold",
+    "Waycrest Manor",
+    "Atal'Dazar",
+    "The Everbloom",
+    "Throne of the Tides"
 }
 
 local function isInList(name, lst)
