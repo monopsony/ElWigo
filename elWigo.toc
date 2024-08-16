@@ -1,8 +1,8 @@
-## Interface: 100200
+## Interface: 100207, 110000, 110002
 ## Title: elWigo
 ## Notes: nil
 ## Author: Mono
-## Version: v1.3.3
+## Version: v1.4
 ## DefaultState: disabled
 ## SavedVariables: ElWigoDB
 ## Dependencies: BigWigs
