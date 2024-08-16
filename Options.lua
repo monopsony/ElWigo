@@ -16,6 +16,7 @@ local SecondsToTime = SecondsToTime
 local getNumberAfterUnderscore = EW.utils.getNumberAfterUnderscore
 local getNumberAfterSpace = EW.utils.getNumberAfterSpace
 local GetMapInfo = C_Map.GetMapInfo
+local GetRealZoneText = GetRealZoneText
 
 EW.options = {}
 local opt = EW.options
@@ -161,7 +162,8 @@ local aceOptions = {
             name = "Bosses",
             type = "group",
             childGroups = "select",
-            args = {}
+            args = {
+            }
         }
     }
 }
@@ -1574,83 +1576,111 @@ end
 -- this is just used to put the raids in front of the dungeons in the boss list
 -- doing it manually because seemingly theres no way to get instance info of
 -- a given ID? Or Im just daft, idk
+-- not currently bothering with this any more, bite me 
 local isRaidIDTable = {
     [2296] = true -- Nathria,
 }
 
-local currentContentList = {"BigWigs_Dragonflight", "LittleWigs_Dragonflight"}
-local mplusContentList = {
-    "LittleWigs_MistsOfPandaria", 
-    "LittleWigs_WarlordsOfDraenor",
-    "LittleWigs_BattleForAzeroth",
-    "LittleWigs_Legion",
-    "LittleWigs_Cataclysm"
-}
-local oldDungeonsList = {
-    "Darkheart Thicket",
-    "Black Rook Hold",
-    "Waycrest Manor",
-    "Atal'Dazar",
-    "The Everbloom",
-    "Throne of the Tides"
-}
+local function prettifyZoneName(s)
+    s = s:gsub("^BigWigs_","")
+    s = s:gsub("^LittleWigs_","")
 
-local function isInList(name, lst)
-    for i,v in ipairs(lst) do 
-        if name == v then return true end
+    return s
+end
+
+local function getNameFromRaidID(id)
+    local name
+    if id < 0 then
+        local tbl = GetMapInfo(id)
+        if tbl then
+            name = tbl.name
+        else
+            name = tostring(id)
+        end
+    else
+        name = GetRealZoneText(id)
     end
-    return false
+    return name
+end
+
+EW.expansionTable = {}
+EW.expansionList = {}
+function opt:updateBWLists()
+    local loader = BigWigsLoader
+    local expansionTable = EW.expansionTable
+    local tree = aceOptions.args.bosses.args
+    local zoneTbl = loader.zoneTbl
+    self.selectedExpansionIndex = 1
+    for k in next, loader:GetZoneMenus() do
+        local name = zoneTbl[k]
+        local names = {}
+        if type(name) == "table" then
+            for _,b in ipairs(name) do table.insert(names,prettifyZoneName(b)) end
+        else
+            table.insert(names, prettifyZoneName(name))
+        end
+
+        for _,v in ipairs(names) do
+            if not expansionTable[v] then expansionTable[v] = {} end
+            expansionTable[v][k] = true
+        end
+    end
+
+    local expansionList = EW.expansionList
+    for k,_ in pairs(expansionTable) do
+        table.insert(expansionList, k)
+    end
+    table.sort(expansionList)
+
+    -- put current season on top
+    local hasCS = false
+    for i,v in ipairs(expansionList) do
+        if v == "CurrentSeason" then
+            hasCS = true
+            table.remove(expansionList, i)
+        end
+    end
+    if hasCS then table.insert(expansionList, 1, "CurrentSeason") end
+
+    tree["expansionSelect"] = {
+        name = "Expansion",
+        type = "select",
+        style = "dropdown",
+        order = 1,
+        values = expansionList,
+        set = function(tbl, index)
+            opt.selectedExpansionIndex = index
+            opt:updateBWRaidList()
+        end,
+        get = function()
+            return opt.selectedExpansionIndex
+        end
+    }
+    self:updateBWRaidList()
 end
 
 function opt:updateBWRaidList()
     local para = EW.para.bosses
 
+    if not self.selectedExpansionIndex then return end
+
     -- NOTE:
     -- This is (largely) mimicking the bigwigs source code
     -- This is just used to have all the raid bosses that BW does
     local raids = self.raids
-    local loader = BigWigsLoader
-    local zoneToId = {}
-    local alphabeticalZoneList = {}
-    local zoneTbl = loader.zoneTbl
     local tree = aceOptions.args.bosses.args
+    local expansionTable = EW.expansionTable
+    local selectedExpansion = EW.expansionList[self.selectedExpansionIndex]
 
-    for k in next, loader:GetZoneMenus() do
-        local currentContent = isInList(zoneTbl[k], currentContentList)
-        local mplusContent = isInList(zoneTbl[k], mplusContentList)
-
-        if currentContent or mplusContent then -- toad REMOVE
-            local zone
-            if k < 0 then
-                local tbl = GetMapInfo(-k)
-                if tbl then
-                    zone = tbl.name
-                else
-                    zone = tostring(k)
-                end
-            else
-                zone = GetRealZoneText(k)
-            end
-            if zone and mplusContent then
-                zone = (isInList(zone, oldDungeonsList) and zone)
-            end
-            if zone then
-                if zoneToId[zone] then
-                    zone = zone .. "1" -- When instances exist more than once (Karazhan)
-                end
-                zoneToId[zone] = k
-                alphabeticalZoneList[#alphabeticalZoneList + 1] = zone
-            end
-        end
+    for k,v in pairs(tree) do 
+        if k ~= "expansionSelect" then tree[k] = nil end
     end
 
-    for i = 1, #alphabeticalZoneList do
-        local zoneName = alphabeticalZoneList[i]
-        local id = zoneToId[zoneName]
+    for id,_ in pairs(expansionTable[selectedExpansion]) do
+        local zoneName = getNameFromRaidID(id)
         raids[id] = {name = zoneName}
 
         local order = isRaidIDTable[id] and 1 or 2
-
         tree[tostring(id)] = {
             name = zoneName,
             type = "group",
@@ -1678,27 +1708,13 @@ function opt:updateBWRaidList()
     return raids
 end
 
-function opt:updateRaidListAll(force)
-    local raids = self.raids
-    local tree = aceOptions.args.bosses.args
-    wipe(tree)
-    local bossesPara = EW.para.bosses
-
-    for raidID, raidInfo in pairs(raids) do
-        self:updateRaidList(raidID)
-    end -- end of for raidID, raidInfo
-end
 
 function opt:updateRaidList(raidID, refreshInfo, refreshAce)
     local bossesPara = EW.para.bosses
     local para = bossesPara
     local raids = self.raids
     local loader = BigWigsLoader
-    local zoneToId = {}
-    local alphabeticalZoneList = {}
-    local zoneTbl = loader.zoneTbl
     local tree = aceOptions.args.bosses.args
-    local bosses = tree[idString]
     local idString = tostring(raidID)
     local nameToId = EW.para.instanceSpellNameToID
 
@@ -1726,7 +1742,7 @@ function opt:updateRaidList(raidID, refreshInfo, refreshAce)
         for i = 1, #moduleList do
             local module = moduleList[i]
             if module.engageId then
-                a = {
+                local a = {
                     id = module.engageId,
                     name = module.moduleName,
                     displayName = module.displayName,

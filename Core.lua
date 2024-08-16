@@ -267,7 +267,8 @@ function EW:OnInitialize()
     self.bigWigs:registerAllMessages()
 
     -- load BW raids
-    self.options:updateBWRaidList()
+    self.options:updateBWLists()
+    -- self.options:updateBWRaidList()
 
     -- UI
     self:updateBars()
@@ -361,7 +362,7 @@ EW.eventFrame:SetScript(
             EW:removeAllFrames()
             local EW = EW
             C_Timer.After(
-                3,
+                2,
                 function()
                     EW:updateBarsVisibility()
                 end
