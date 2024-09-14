@@ -1612,7 +1612,7 @@ function opt:updateBWLists()
     local zoneTbl = loader.zoneTbl
     self.selectedExpansionIndex = 1
     for k in next, loader:GetZoneMenus() do
-        local name = zoneTbl[k]
+        local name = zoneTbl[k] or "Other"
         local names = {}
         if type(name) == "table" then
             for _,b in ipairs(name) do table.insert(names,prettifyZoneName(b)) end
