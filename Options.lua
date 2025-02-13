@@ -762,6 +762,18 @@ local iconOptions = {
             return unpack(opt:getSelectedIconPara("color"))
         end
     },
+    zoom = {
+        order = 18,
+        type = "toggle",
+        name = "Zoom (Remove Border)",
+        desc = "Zoom in the icon to remove blizzard borders",
+        set = function(tbl, value)
+            opt:setSelectedIconPara("zoom", value)
+        end,
+        get = function()
+            return opt:getSelectedIconPara("zoom")
+        end
+    },
     -- DURATION
     separatorDuration = {order = 30, type = "header", name = "Duration Text"},
     durationText = {
