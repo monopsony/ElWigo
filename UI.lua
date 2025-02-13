@@ -553,6 +553,9 @@ function EW:updateFramePara(frame)
     else
         frame.icon:SetTexture(para.selectedIcon or 134400)
     end
+
+    -- ** Apply Zoom Here **
+    if para.zoom then frame.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
 end
 
 function EW:removeAllFrames()
